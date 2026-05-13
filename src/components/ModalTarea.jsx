@@ -2,7 +2,8 @@ import { useRef } from 'react'
 import { useApp } from '../context/AppContext'
 
 export default function ModalTarea() {
-  const { tareas, historias, modalTarea, setModalTarea, huSeleccionada, addTarea } = useApp()
+  const { tareas, historias, modalTarea, setModalTarea, huSeleccionada, addTarea, editTarea } = useApp()
+  const { open, editData, huActual: huFromModal } = modalTarea
 
   const idRef        = useRef()
   const tipoRef      = useRef()
@@ -14,13 +15,16 @@ export default function ModalTarea() {
   const estadoRef    = useRef()
   const condicionRef = useRef()
 
-  if (!modalTarea.open) return null
+  if (!open) return null
 
-  const close = () => setModalTarea({ open: false })
+  const close = () => setModalTarea({ open: false, editData: null, huActual: null })
   const handleOverlay = (e) => { if (e.target === e.currentTarget) close() }
 
-  const defaultId = `TR${String(tareas.length + 1).padStart(2, '0')}`
-  const hu = historias.find(h => h.id === huSeleccionada)
+  const isEdit = !!editData
+  // resolve which historia to use: from modal state or from huSeleccionada
+  const hu = huFromModal ?? historias.find(h => h.id === huSeleccionada)
+
+  const defaultId = editData?.codigo ?? editData?.id ?? `TR${String(tareas.length + 1).padStart(2, '0')}`
 
   const handleSave = async () => {
     if (!hu) return
@@ -36,7 +40,12 @@ export default function ModalTarea() {
       condicion:    condicionRef.current.value.trim(),
     }
     if (!data.codigo || !data.nombre) { alert('El ID y el nombre son obligatorios.'); return }
-    await addTarea(hu, data)
+
+    if (isEdit) {
+      await editTarea(hu, editData.id, data)
+    } else {
+      await addTarea(hu, data)
+    }
     close()
   }
 
@@ -46,7 +55,7 @@ export default function ModalTarea() {
         <div className="modal-header">
           <div className="modal-title">
             <span className="modal-title-badge tr">TR</span>
-            Nueva Tarea
+            {isEdit ? 'Editar Tarea' : 'Nueva Tarea'}
           </div>
           <button className="close-btn" onClick={close}>✕</button>
         </div>
@@ -59,7 +68,7 @@ export default function ModalTarea() {
             </div>
             <div className="form-row">
               <label className="form-label">Tipo</label>
-              <select ref={tipoRef} className="form-select">
+              <select ref={tipoRef} className="form-select" defaultValue={editData?.tipo ?? 'RF'}>
                 <option>RF</option><option>RNF</option><option>RF/RNF</option>
               </select>
             </div>
@@ -67,17 +76,17 @@ export default function ModalTarea() {
 
           <div className="form-row">
             <label className="form-label">Nombre de la tarea</label>
-            <input ref={nombreRef} className="form-input" type="text" placeholder="Ej. Diseño de mockup pantalla principal" />
+            <input ref={nombreRef} className="form-input" type="text" defaultValue={editData?.nombre ?? ''} placeholder="Ej. Diseño de mockup pantalla principal" />
           </div>
 
           <div className="form-grid">
             <div className="form-row">
               <label className="form-label">Estimación (días)</label>
-              <input ref={estRef} className="form-input" type="number" min="0.5" step="0.5" placeholder="2" />
+              <input ref={estRef} className="form-input" type="number" min="0.5" step="0.5" defaultValue={editData?.estimacion ?? ''} placeholder="2" />
             </div>
             <div className="form-row">
               <label className="form-label">Prioridad</label>
-              <select ref={prioRef} className="form-select">
+              <select ref={prioRef} className="form-select" defaultValue={editData?.prioridad ?? 'ALTA'}>
                 <option>ALTA</option><option>MEDIA</option><option>BAJA</option>
               </select>
             </div>
@@ -85,26 +94,33 @@ export default function ModalTarea() {
 
           <div className="form-row">
             <label className="form-label">Responsable</label>
-            <input ref={respRef} className="form-input" type="text" placeholder="Nombre del integrante" />
+            <input ref={respRef} className="form-input" type="text" defaultValue={editData?.responsable ?? ''} placeholder="Nombre del integrante" />
           </div>
           <div className="form-row">
             <label className="form-label">Dependencias (ID de tareas)</label>
-            <input ref={depRef} className="form-input" type="text" placeholder="TR01, TR05" />
+            <input ref={depRef} className="form-input" type="text" defaultValue={editData?.dependencias ?? ''} placeholder="TR01, TR05" />
           </div>
           <div className="form-row">
             <label className="form-label">Estado (%)</label>
-            <input ref={estadoRef} className="form-input" type="number" min="0" max="100" placeholder="0" />
+            <input ref={estadoRef} className="form-input" type="number" min="0" max="100" defaultValue={editData?.estado ?? '0'} placeholder="0" />
           </div>
           <div className="form-row">
             <label className="form-label">Condición de aprobación</label>
-            <textarea ref={condicionRef} className="form-textarea" style={{ minHeight: 56 }}
-              placeholder="Ej. Validado por el instructor y aprobado en revisión de par." />
+            <textarea
+              ref={condicionRef}
+              className="form-textarea"
+              style={{ minHeight: 56 }}
+              defaultValue={editData?.condicion ?? ''}
+              placeholder="Ej. Validado por el instructor y aprobado en revisión de par."
+            />
           </div>
         </div>
 
         <div className="modal-footer">
           <button className="btn-modal-cancel" onClick={close}>Cancelar</button>
-          <button className="btn-modal-save" onClick={handleSave}>Guardar tarea</button>
+          <button className="btn-modal-save" onClick={handleSave}>
+            {isEdit ? 'Actualizar tarea' : 'Guardar tarea'}
+          </button>
         </div>
       </div>
     </div>

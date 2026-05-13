@@ -3,7 +3,7 @@ import { getProyecto, updateProyecto, getBacklog } from '../api/proyectos'
 import {
   createEpica, updateEpica, deleteEpica,
   createHistoria, updateHistoria, deleteHistoria,
-  createTarea, deleteTarea,
+  createTarea, updateTarea, deleteTarea,
   cacheManyHistoriasEpicas, cacheHistoriaEpica,
 } from '../api/backlog'
 import api from '../api/axios'
@@ -25,7 +25,7 @@ export function AppProvider({ children, proyectoId }) {
   // Modales
   const [modalEpica, setModalEpica] = useState({ open: false })
   const [modalHU, setModalHU]       = useState({ open: false, editData: null, epicaId: null })
-  const [modalTarea, setModalTarea] = useState({ open: false })
+  const [modalTarea, setModalTarea] = useState({ open: false, editData: null, huActual: null })
 
   // Toast
   const [toastMsg, setToastMsg] = useState(null)
@@ -120,8 +120,16 @@ export function AppProvider({ children, proyectoId }) {
   // ── Tareas ────────────────────────────────────────────────────────────────────
   async function addTarea(hu, data) {
     const res = await createTarea(hu.id, data)
-    setTareas(prev => [...prev, { ...res.data, huId: hu.id }])
-    showToast(`✔ Tarea ${res.data.codigo ?? res.data.id} agregada`)
+    const nueva = res.data?.data ?? res.data
+    setTareas(prev => [...prev, { ...nueva, huId: hu.id }])
+    showToast(`✔ Tarea ${nueva.codigo ?? nueva.id} agregada`)
+  }
+
+  async function editTarea(hu, tareaId, data) {
+    const res = await updateTarea(hu.id, tareaId, data)
+    const updated = res.data?.data ?? res.data
+    setTareas(prev => prev.map(t => t.id === tareaId ? { ...updated, huId: hu.id } : t))
+    showToast('✔ Tarea actualizada')
   }
 
   async function removeTarea(hu, tareaId) {
@@ -148,7 +156,7 @@ export function AppProvider({ children, proyectoId }) {
       toastMsg,
       addEpica, removeEpica,
       addHistoria, editHistoria, removeHistoria,
-      addTarea, removeTarea,
+      addTarea, editTarea, removeTarea,
       syncProyecto,
     }}>
       {children}
