@@ -24,13 +24,14 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function login(email, password) {
-    const res = await apiLogin(email, password)
-    const { token: nuevoToken, user } = res.data
-    localStorage.setItem('token', nuevoToken)
-    setToken(nuevoToken)
-    setUsuario(user)
-    return user
-  }
+  const res = await apiLogin(email, password)
+  const { token: tokenObj, usuario } = res.data     
+  const nuevoToken = tokenObj.token             
+  localStorage.setItem('token', nuevoToken)
+  setToken(nuevoToken)
+  setUsuario(usuario)
+  return usuario
+}
 
   async function logout() {
     await apiLogout().catch(() => {})
