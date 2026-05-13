@@ -1,0 +1,99 @@
+:root {
+  /* ── Colores de marca SENA ── */
+  --sena-green-dark:    #1a5c2e;
+  --sena-green:         #2d7a44;
+  --sena-green-mid:     #3a9455;
+  --sena-green-light:   #e8f5ec;
+  --sena-green-border:  #b8ddc3;
+
+  /* ── Superficies / Layout ── */
+  --bg-page:            #f4f6f8;
+  --bg-white:           #ffffff;
+  --bg-sidebar:         #1a5c2e;
+  --bg-header:          #1a5c2e;
+  --bg-subheader:       #ffffff;
+  --bg-panel:           #f9fafb;
+
+  /* ── Texto ── */
+  --text-primary:       #1a2332;
+  --text-secondary:     #4a5568;
+  --text-muted:         #8a97a8;
+  --text-on-dark:       #ffffff;
+  --text-on-dark-muted: rgba(255,255,255,0.65);
+
+  /* ── Bordes ── */
+  --border-light:       #e8ecf0;
+  --border-medium:      #d1d8e0;
+  --border-strong:      #b0bcc8;
+
+  /* ── Prioridad ── */
+  --priority-alta-bg:    #fff0f0;
+  --priority-alta-text:  #c0392b;
+  --priority-alta-border:#f5c6c6;
+
+  --priority-media-bg:   #fffbf0;
+  --priority-media-text: #d97706;
+  --priority-media-border:#fde68a;
+
+  --priority-baja-bg:    #f0fff4;
+  --priority-baja-text:  #15803d;
+  --priority-baja-border:#bbf7d0;
+
+  /* ── Estado ── */
+  --estado-hacer-bg:     #f5f7ff;
+  --estado-hacer-text:   #4a5fa8;
+  --estado-hacer-border: #c7d2f8;
+
+  --estado-progreso-bg:  #fff8ec;
+  --estado-progreso-text:#b45309;
+  --estado-progreso-border:#fed7aa;
+
+  --estado-hecho-bg:     #f0fdf4;
+  --estado-hecho-text:   #166534;
+  --estado-hecho-border: #bbf7d0;
+
+  /* ── Épicas ── */
+  --epica-bg:            #1a5c2e;
+  --epica-text:          #ffffff;
+
+  /* ── Stat cards ── */
+  --stat-epicas:         #2d7a44;
+  --stat-historias:      #d97706;
+  --stat-sp:             #7c3aed;
+  --stat-sprints:        #0284c7;
+
+  /* ── Botones ── */
+  --btn-epica-bg:        #2d7a44;
+  --btn-epica-text:      #ffffff;
+  --btn-epica-hover:     #1a5c2e;
+
+  --btn-historia-bg:     #ffffff;
+  --btn-historia-text:   #2d7a44;
+  --btn-historia-border: #2d7a44;
+  --btn-historia-hover:  #e8f5ec;
+
+  --btn-xlsx-bg:         #ffffff;
+  --btn-xlsx-text:       #2d7a44;
+  --btn-xlsx-border:     #2d7a44;
+  --btn-xlsx-hover:      #e8f5ec;
+
+  /* ── Sidebar ── */
+  --sidebar-width:       300px;
+
+  /* ── Tipografía ── */
+  --font-sans:           'Plus Jakarta Sans', sans-serif;
+  --font-mono:           'JetBrains Mono', monospace;
+
+  /* ── Radios ── */
+  --radius-sm:           6px;
+  --radius-md:           10px;
+  --radius-lg:           14px;
+
+  /* ── Sombras ── */
+  --shadow-sm:           0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:           0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:           0 8px 32px rgba(0,0,0,0.14);
+
+  /* ── Transiciones ── */
+  --transition:          0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}

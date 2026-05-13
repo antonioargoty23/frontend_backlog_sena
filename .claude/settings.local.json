@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp /d/web_ia_estudio/backlog-sena/assets/logoSena.png /d/web_ia_estudio/backlog-sena-frontend/src/assets/logoSena.png && echo \"Logo copiado\")"
+    ]
+  }
+}

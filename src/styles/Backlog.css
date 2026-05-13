@@ -1,0 +1,218 @@
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.backlog-content {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Encabezado backlog ── */
+.backlog-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+.backlog-title-icon {
+  width: 36px; height: 36px;
+  background: var(--sena-green-light);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.backlog-title-icon svg { width: 20px; height: 20px; color: var(--sena-green); }
+.backlog-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.backlog-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+/* ── Stat cards ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.stat-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon svg { width: 22px; height: 22px; }
+.stat-icon.epicas   { background: #e8f5ec; color: var(--stat-epicas); }
+.stat-icon.historias{ background: #fef3c7; color: var(--stat-historias); }
+.stat-icon.sp       { background: #ede9fe; color: var(--stat-sp); }
+.stat-icon.sprints  { background: #e0f2fe; color: var(--stat-sprints); }
+
+.stat-info .stat-val {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+.stat-info .stat-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* ── Sección épica ── */
+.epica-section {
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.epica-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-light);
+}
+.epica-badge-main {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--epica-bg);
+  color: var(--epica-text);
+  padding: 3px 10px;
+  border-radius: 5px;
+  letter-spacing: 0.3px;
+}
+.epica-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+.epica-meta { display: flex; align-items: center; gap: 8px; }
+.epica-hu-count { font-size: 12px; color: var(--text-muted); }
+.epica-sp-total {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sena-green);
+  background: var(--sena-green-light);
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+/* ── Tabla HU ── */
+.hu-table-wrap { overflow-x: auto; }
+.hu-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+.hu-table th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 9px 14px;
+  text-align: left;
+  background: #fafbfc;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+.hu-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.hu-table tr:last-child td { border-bottom: none; }
+.hu-table tbody tr { transition: background var(--transition); }
+.hu-table tbody tr:hover td { background: #f8fffe; }
+
+.td-hu-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sena-green);
+  white-space: nowrap;
+}
+.td-hu-story { min-width: 260px; }
+.td-hu-rol { font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 2px; }
+.td-hu-deseo { color: var(--text-primary); font-weight: 500; }
+.td-hu-criterios { font-size: 11px; color: var(--text-secondary); line-height: 1.6; min-width: 160px; }
+.td-hu-criterios ul { padding-left: 12px; }
+.td-hu-criterios li { margin-bottom: 2px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.badge-alta    { background: var(--priority-alta-bg);    color: var(--priority-alta-text);    border: 1px solid var(--priority-alta-border); }
+.badge-media   { background: var(--priority-media-bg);   color: var(--priority-media-text);   border: 1px solid var(--priority-media-border); }
+.badge-baja    { background: var(--priority-baja-bg);    color: var(--priority-baja-text);    border: 1px solid var(--priority-baja-border); }
+.badge-hacer   { background: var(--estado-hacer-bg);     color: var(--estado-hacer-text);     border: 1px solid var(--estado-hacer-border); }
+.badge-progreso{ background: var(--estado-progreso-bg);  color: var(--estado-progreso-text);  border: 1px solid var(--estado-progreso-border); }
+.badge-hecho   { background: var(--estado-hecho-bg);     color: var(--estado-hecho-text);     border: 1px solid var(--estado-hecho-border); }
+
+.badge-sprint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  padding: 3px 9px;
+  border-radius: 5px;
+}
+.badge-sp {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--stat-sp);
+}
+
+/* ── Row actions ── */
+.row-actions { opacity: 0; transition: opacity var(--transition); }
+.hu-table tbody tr:hover .row-actions { opacity: 1; }
+.row-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+}
+.row-menu-btn:hover { background: var(--bg-page); color: var(--text-primary); }
+
+.empty-epica {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.empty-epica a { color: var(--sena-green); }
