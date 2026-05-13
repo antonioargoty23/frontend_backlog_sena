@@ -2,67 +2,61 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import logoSena from '../assets/logoSena.png'
-import '../styles/variables.css'
+import '../styles/login.css'
 
 export default function LoginPage() {
-  const { login } = useAuth()
-  const navigate  = useNavigate()
+  const { login }   = useAuth()
+  const navigate    = useNavigate()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState(null)
-  const [loading, setLoading]   = useState(false)
+  const [cargando, setCargando] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
-    setLoading(true)
+    setCargando(true)
     try {
       await login(email, password)
       navigate('/dashboard')
     } catch {
       setError('Correo o contraseña incorrectos.')
     } finally {
-      setLoading(false)
+      setCargando(false)
     }
   }
 
   return (
-    <div style={{
-      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--bg-page)', fontFamily: 'var(--font-sans)',
-    }}>
-      <div style={{
-        background: '#fff', borderRadius: 'var(--radius-lg)', padding: '40px 36px',
-        width: '100%', maxWidth: 400, boxShadow: 'var(--shadow-lg)',
-        border: '1px solid var(--border-light)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-          <img src={logoSena} alt="SENA" style={{ width: 40, height: 40 }} />
+    <div className="login-page">
+      <div className="login-card">
+
+        <div className="login-brand">
+          <img src={logoSena} alt="SENA" />
           <div>
-            <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-primary)' }}>
-              SENA <strong>CTPI</strong>
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              PRODUCT BACKLOG DEL PROYECTO FORMATIVO
-            </div>
+            <div className="login-brand-name">SENA <strong>CTPI</strong></div>
+            <div className="login-brand-sub">Product Backlog del Proyecto Formativo</div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-row">
-            <label className="form-label">Correo electrónico</label>
+            <label className="form-label" htmlFor="email">Correo electrónico</label>
             <input
+              id="email"
               className="form-input"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="usuario@sena.edu.co"
               required
+              autoFocus
             />
           </div>
+
           <div className="form-row">
-            <label className="form-label">Contraseña</label>
+            <label className="form-label" htmlFor="password">Contraseña</label>
             <input
+              id="password"
               className="form-input"
               type="password"
               value={password}
@@ -72,21 +66,17 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
-            <div style={{ fontSize: 12, color: 'var(--priority-alta-text)', background: 'var(--priority-alta-bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--priority-alta-border)' }}>
-              {error}
-            </div>
-          )}
+          {error && <div className="login-error">{error}</div>}
 
           <button
             type="submit"
-            className="btn-modal-save"
-            style={{ marginTop: 4, padding: '10px 0', width: '100%', fontSize: 14 }}
-            disabled={loading}
+            className="login-submit"
+            disabled={cargando}
           >
-            {loading ? 'Ingresando…' : 'Ingresar'}
+            {cargando ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
+
       </div>
     </div>
   )

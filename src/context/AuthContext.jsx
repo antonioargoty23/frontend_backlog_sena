@@ -8,14 +8,14 @@ export function AuthProvider({ children }) {
   const [token, setToken]     = useState(() => localStorage.getItem('token'))
   const [loading, setLoading] = useState(true)
 
-  // Al montar: si hay token en localStorage carga el usuario
+  // Al montar: si hay token carga el usuario completo (con rol y ficha)
   useEffect(() => {
     if (!token) {
       setLoading(false)
       return
     }
     getMe()
-      .then(res => setUsuario(res.data))
+      .then(res => setUsuario(res.data.usuario))
       .catch(() => {
         localStorage.removeItem('token')
         setToken(null)
@@ -24,14 +24,17 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function login(email, password) {
-  const res = await apiLogin(email, password)
-  const { token: tokenObj, usuario } = res.data     
-  const nuevoToken = tokenObj.token             
-  localStorage.setItem('token', nuevoToken)
-  setToken(nuevoToken)
-  setUsuario(usuario)
-  return usuario
-}
+    const res = await apiLogin(email, password)
+    const { token: tokenObj } = res.data
+    const nuevoToken = tokenObj.token
+    localStorage.setItem('token', nuevoToken)
+    setToken(nuevoToken)
+    // Carga usuario completo con rol y ficha desde getMe
+    const meRes = await getMe()
+    const usuarioCompleto = meRes.data.usuario
+    setUsuario(usuarioCompleto)
+    return usuarioCompleto
+  }
 
   async function logout() {
     await apiLogout().catch(() => {})

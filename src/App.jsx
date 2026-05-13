@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { AppProvider } from './context/AppContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -6,6 +6,15 @@ import LoginPage      from './pages/LoginPage'
 import DashboardPage  from './pages/DashboardPage'
 import ProyectosPage  from './pages/ProyectosPage'
 import BacklogPage    from './pages/BacklogPage'
+
+function BacklogRoute() {
+  const { id } = useParams()
+  return (
+    <AppProvider proyectoId={id}>
+      <BacklogPage />
+    </AppProvider>
+  )
+}
 
 export default function App() {
   return (
@@ -30,9 +39,7 @@ export default function App() {
 
           <Route path="/proyectos/:id" element={
             <ProtectedRoute>
-              <AppProvider>
-                <BacklogPage />
-              </AppProvider>
+              <BacklogRoute />
             </ProtectedRoute>
           } />
 

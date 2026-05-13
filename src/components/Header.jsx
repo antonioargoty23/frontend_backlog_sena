@@ -1,13 +1,21 @@
+import { useNavigate } from 'react-router-dom'
 import logoSena from '../assets/logoSena.png'
 import { useApp } from '../context/AppContext'
+import { descargarExcel } from '../api/proyectos'
 import '../styles/Header.css'
 
 export default function Header() {
+  const navigate = useNavigate()
   const {
+    proyecto,
     sidebarCollapsed, setSidebarCollapsed,
     vistaActual, setVistaActual,
     setModalEpica, setModalHU,
   } = useApp()
+
+  const handleExcel = () => {
+    if (proyecto.id) descargarExcel(proyecto.id).catch(console.error)
+  }
 
   return (
     <header className="app-header">
@@ -57,7 +65,7 @@ export default function Header() {
           </svg>
           Historia
         </button>
-        <button className="btn-header btn-xlsx">
+        <button className="btn-header btn-xlsx" onClick={handleExcel}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -67,23 +75,10 @@ export default function Header() {
         </button>
 
         <div className="header-icons">
-          <button className="icon-btn" title="Notificaciones">
+          <button className="icon-btn" title="Volver a proyectos" onClick={() => navigate('/proyectos')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-          </button>
-          <button className="icon-btn" title="Ayuda">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </button>
-          <button className="icon-btn" title="Perfil">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
             </svg>
           </button>
         </div>

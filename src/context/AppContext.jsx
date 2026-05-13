@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { getProyectos, updateProyecto, getBacklog } from '../api/proyectos'
+import { getProyecto, updateProyecto, getBacklog } from '../api/proyectos'
 import {
   createEpica, updateEpica, deleteEpica,
   createHistoria, updateHistoria, deleteHistoria,
@@ -10,7 +10,7 @@ import api from '../api/axios'
 
 const AppContext = createContext(null)
 
-export function AppProvider({ children }) {
+export function AppProvider({ children, proyectoId }) {
   const [proyecto, setProyecto] = useState({ id: null, nombre: '', dueno: '' })
   const [epicas, setEpicas]     = useState([])
   const [historias, setHistorias] = useState([])
@@ -37,40 +37,41 @@ export function AppProvider({ children }) {
 
   // ── Carga inicial ────────────────────────────────────────────────────────────
   useEffect(() => {
-    getProyectos()
+    if (!proyectoId) { setLoading(false); return }
+    localStorage.setItem('proyectoActivo', proyectoId)
+    getProyecto(proyectoId)
       .then(res => {
-        const p = Array.isArray(res.data) ? res.data[0] : res.data
-        if (!p) return Promise.resolve(null)
+        const p = res.data?.data ?? res.data
         setProyecto({ id: p.id, nombre: p.nombre, dueno: p.dueno ?? '' })
-        localStorage.setItem('proyectoActivo', p.id)
-        return getBacklog(p.id)
+        return getBacklog(proyectoId)
       })
       .then(res => {
-        if (!res) return
-        const { epicas: ep = [], historias: hu = [] } = res.data
+        const payload = res.data?.data ?? res.data
+        const ep = payload.epicas ?? []
+        const hu = payload.historias ?? []
         setEpicas(ep)
         setHistorias(hu)
         cacheManyHistoriasEpicas(hu)
       })
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [])
+  }, [proyectoId])
 
   // ── Tareas: carga al seleccionar HU ──────────────────────────────────────────
   useEffect(() => {
-    if (!huSeleccionada) return
+    if (!huSeleccionada || !proyecto.id) return
     const hu = historias.find(h => h.id === huSeleccionada)
     if (!hu) return
-    const pId = proyecto.id
-    api.get(`/proyectos/${pId}/epicas/${hu.epicaId}/historias/${hu.id}/tareas`)
+    api.get(`/proyectos/${proyecto.id}/epicas/${hu.epicaId}/historias/${hu.id}/tareas`)
       .then(res => {
+        const lista = res.data?.data ?? res.data ?? []
         setTareas(prev => [
           ...prev.filter(t => t.huId !== huSeleccionada),
-          ...res.data.map(t => ({ ...t, huId: hu.id })),
+          ...lista.map(t => ({ ...t, huId: hu.id })),
         ])
       })
       .catch(console.error)
-  }, [huSeleccionada])
+  }, [huSeleccionada, proyecto.id])
 
   // ── Stats derivados ───────────────────────────────────────────────────────────
   const stats = {
