@@ -29,7 +29,7 @@ export default function Subheader() {
 
   // ── Panel info ───────────────────────────────────────────────
   const [panelOpen, setPanelOpen] = useState(false)
-  const [form, setForm]   = useState({ nombre: '', descripcion: '', ficha_id: '', integrantes: '' })
+  const [form, setForm]   = useState({ nombre: '', descripcion: '', dueno: '', ficha_id: '', integrantes: '' })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -37,12 +37,13 @@ export default function Subheader() {
       setForm({
         nombre:      proyecto.nombre       ?? '',
         descripcion: proyecto.descripcion  ?? '',
+        dueno:       proyecto.dueno        ?? '',
         ficha_id:    proyecto.fichaId      ?? '',
         integrantes: proyecto.integrantes  ?? '',
       })
       setSaving(false)
     }
-  }, [panelOpen, proyecto.nombre, proyecto.descripcion, proyecto.fichaId, proyecto.integrantes])
+  }, [panelOpen, proyecto.nombre, proyecto.descripcion, proyecto.dueno, proyecto.fichaId, proyecto.integrantes])
 
   const handleGuardar = async () => {
     if (!form.nombre.trim()) return
@@ -51,6 +52,7 @@ export default function Subheader() {
       await updateInfoProyecto({
         nombre:      form.nombre.trim(),
         descripcion: form.descripcion.trim(),
+        dueno:       form.dueno.trim(),
         integrantes: form.integrantes.trim(),
         ...(form.ficha_id ? { ficha_id: Number(form.ficha_id) } : {}),
       })
@@ -180,7 +182,18 @@ export default function Subheader() {
             {/* Dueño */}
             <div className="pip-field">
               <div className="pip-label">Dueño / Product Owner</div>
-              <div className="pip-value">{proyecto.dueno || '—'}</div>
+              {esInstructor ? (
+                <input
+                  className="pip-input"
+                  type="text"
+                  value={form.dueno}
+                  onChange={e => setForm(f => ({ ...f, dueno: e.target.value }))}
+                  placeholder="Nombre del Product Owner"
+                  maxLength={150}
+                />
+              ) : (
+                <div className="pip-value">{proyecto.dueno || '—'}</div>
+              )}
             </div>
 
             {/* Fecha */}

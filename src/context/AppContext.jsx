@@ -186,6 +186,7 @@ export function AppProvider({ children, proyectoId }) {
       ...p,
       nombre:      data.nombre      ?? p.nombre,
       descripcion: data.descripcion ?? p.descripcion,
+      dueno:       data.dueno       ?? p.dueno,
       integrantes: data.integrantes ?? p.integrantes,
       fichaId:     data.ficha_id    ?? p.fichaId,
       // Limpia el objeto ficha si cambió para evitar mostrar datos desactualizados
