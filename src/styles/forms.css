@@ -1,0 +1,229 @@
+/* ═══════════════════════════════════════════════════════════
+   FORMS — estilos de validación, slider y extras de modal
+   Complementa Modal.css, no lo duplica.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Campo con estado de error ── */
+.form-input.invalid,
+.form-select.invalid,
+.form-textarea.invalid {
+  border-color: var(--priority-alta-text) !important;
+  background: #fff9f9 !important;
+  box-shadow: 0 0 0 3px #fde8e8 !important;
+}
+
+/* ── Mensaje de error de validación ── */
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--priority-alta-text);
+  margin-top: 3px;
+  animation: errIn 0.18s ease;
+}
+.form-error svg { width: 13px; height: 13px; flex-shrink: 0; }
+@keyframes errIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ── Texto de ayuda (hint) ── */
+.form-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* ── Asterisco de campo obligatorio ── */
+.req::after {
+  content: ' *';
+  color: var(--priority-alta-text);
+}
+
+/* ── Encabezado de campo con contador ── */
+.form-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.form-char-count {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  transition: color var(--transition);
+}
+.form-char-count.near   { color: var(--priority-media-text); }
+.form-char-count.at-max { color: var(--priority-alta-text); }
+
+/* ── Separador de sección dentro del modal ── */
+.form-section {
+  border-top: 1px solid var(--border-light);
+  padding-top: 14px;
+}
+.form-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* ── Grilla de 3 columnas ── */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Slider (estado % avance) ── */
+.form-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+input[type="range"].form-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border-medium);
+  outline: none;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+input[type="range"].form-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--sena-green);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+input[type="range"].form-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(45,122,68,0.35);
+}
+input[type="range"].form-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--sena-green);
+  border: 2px solid #fff;
+  cursor: pointer;
+}
+
+.form-slider-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sena-green);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* ── Badge de código preview ── */
+.form-code-preview {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.form-code-preview.ep { background: var(--epica-bg); color: var(--epica-text); }
+.form-code-preview.hu { background: var(--sena-green-light); color: var(--sena-green); border: 1px solid var(--sena-green-border); }
+.form-code-preview.tr { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+
+/* ── Botón de guardar con loading ── */
+.btn-modal-save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════
+   CONFIRM DIALOG
+   ══════════════════════════════════════════════ */
+.modal.modal-confirm {
+  max-width: 400px;
+}
+
+.confirm-icon-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.confirm-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confirm-icon.danger { background: #fff0f0; color: var(--priority-alta-text); }
+.confirm-icon svg { width: 26px; height: 26px; }
+
+.confirm-body {
+  padding: 24px 28px 20px;
+  text-align: center;
+}
+.confirm-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.confirm-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.confirm-footer {
+  padding: 0 28px 24px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-confirm-cancel {
+  flex: 1;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-confirm-cancel:hover { background: var(--border-light); }
+
+.btn-confirm-ok {
+  flex: 1;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-confirm-ok.danger {
+  background: var(--priority-alta-text);
+  color: #fff;
+}
+.btn-confirm-ok.danger:hover { background: #a93226; }
+.btn-confirm-ok.primary {
+  background: var(--sena-green);
+  color: #fff;
+}
+.btn-confirm-ok.primary:hover { background: var(--sena-green-dark); }

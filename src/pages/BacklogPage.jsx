@@ -4,9 +4,10 @@ import { descargarExcel } from '../api/proyectos'
 import Header from '../components/Header'
 import Subheader from '../components/Subheader'
 import Sidebar from '../components/Sidebar'
-import ModalEpica from '../components/ModalEpica'
-import ModalHU from '../components/ModalHU'
-import ModalTarea from '../components/ModalTarea'
+import FormEpica from '../components/FormEpica'
+import FormHistoria from '../components/FormHistoria'
+import FormTarea from '../components/FormTarea'
+import ConfirmDialog from '../components/ConfirmDialog'
 import Toast from '../components/Toast'
 import '../styles/backlog.css'
 
@@ -171,12 +172,13 @@ function StatsPanel({ onClose }) {
 
 // ── Tarea inline ───────────────────────────────────────────────
 function TareaItem({ tarea, hu }) {
-  const { removeTarea, editTarea, setModalTarea } = useApp()
+  const { removeTarea, editTarea, setModalTarea, askConfirm } = useApp()
   const [editingPct, setEditingPct] = useState(false)
   const [pctVal, setPctVal]         = useState(String(tarea.estado ?? 0))
 
-  const handleDeleteTarea = () => {
-    if (!window.confirm(`¿Eliminar tarea ${tarea.codigo ?? tarea.id}?`)) return
+  const handleDeleteTarea = async () => {
+    const ok = await askConfirm({ title: `¿Eliminar tarea ${tarea.codigo ?? tarea.id}?` })
+    if (!ok) return
     removeTarea(hu, tarea.id)
   }
 
@@ -258,7 +260,7 @@ function TareaItem({ tarea, hu }) {
 
 // ── Historia con tareas ────────────────────────────────────────
 function HistoriaItem({ historia, epica }) {
-  const { tareas, removeHistoria, setModalHU, setModalTarea, setHuSeleccionada } = useApp()
+  const { tareas, removeHistoria, setModalHU, setModalTarea, setHuSeleccionada, askConfirm } = useApp()
   const [expanded, setExpanded] = useState(false)
 
   const tareasHU = tareas.filter(t => t.huId === historia.id)
@@ -279,9 +281,10 @@ function HistoriaItem({ historia, epica }) {
     setModalHU({ open: true, editData: historia, epicaId: epica.id })
   }
 
-  const handleDelete = (e) => {
+  const handleDelete = async (e) => {
     e.stopPropagation()
-    if (!window.confirm(`¿Eliminar historia "${historia.nombre}"? Se eliminarán también sus tareas.`)) return
+    const ok = await askConfirm({ title: `¿Eliminar historia "${historia.nombre}"?`, message: 'Se eliminarán también sus tareas.' })
+    if (!ok) return
     removeHistoria(epica.id, historia.id)
   }
 
@@ -350,7 +353,7 @@ function HistoriaItem({ historia, epica }) {
 
 // ── Épica colapsable ───────────────────────────────────────────
 function EpicaBlock({ epica }) {
-  const { historias, removeEpica, setModalHU } = useApp()
+  const { historias, removeEpica, setModalHU, setModalEpica, askConfirm } = useApp()
   const [collapsed, setCollapsed] = useState(false)
 
   const hus = historias.filter(h => h.epicaId === epica.id)
@@ -361,9 +364,15 @@ function EpicaBlock({ epica }) {
     setModalHU({ open: true, editData: null, epicaId: epica.id })
   }
 
-  const handleDelete = (e) => {
+  const handleEditEpica = (e) => {
     e.stopPropagation()
-    if (!window.confirm(`¿Eliminar épica "${epica.titulo}"? Se eliminarán también sus historias.`)) return
+    setModalEpica({ open: true, editData: epica })
+  }
+
+  const handleDelete = async (e) => {
+    e.stopPropagation()
+    const ok = await askConfirm({ title: `¿Eliminar épica "${epica.titulo}"?`, message: 'Se eliminarán también sus historias y tareas.' })
+    if (!ok) return
     removeEpica(epica.id)
   }
 
@@ -391,6 +400,12 @@ function EpicaBlock({ epica }) {
         <div className="bl-row-actions">
           <button className="bl-btn-add" onClick={handleAddHistoria} title="Nueva historia">
             + Historia
+          </button>
+          <button className="bl-btn-icon" title="Editar épica" onClick={handleEditEpica}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
           </button>
           <button className="bl-btn-icon danger" title="Eliminar épica" onClick={handleDelete}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -423,7 +438,7 @@ export default function BacklogPage() {
   const {
     proyecto, epicas, historias, tareas, stats, loading,
     vistaActual, huSeleccionada, setHuSeleccionada,
-    setModalEpica, setModalTarea, removeTarea,
+    setModalEpica, setModalTarea, removeTarea, askConfirm,
   } = useApp()
 
   const [statsOpen, setStatsOpen] = useState(false)
@@ -592,8 +607,9 @@ export default function BacklogPage() {
                             className="row-menu-btn"
                             title="Eliminar"
                             style={{ color: 'var(--priority-alta-text)' }}
-                            onClick={() => {
-                              if (!window.confirm(`¿Eliminar tarea ${t.codigo ?? t.id}?`)) return
+                            onClick={async () => {
+                              const ok = await askConfirm({ title: `¿Eliminar tarea ${t.codigo ?? t.id}?` })
+                              if (!ok) return
                               removeTarea(huActual, t.id)
                             }}
                           >✕</button>
@@ -628,9 +644,10 @@ export default function BacklogPage() {
         </div>
       </div>
 
-      <ModalEpica />
-      <ModalHU />
-      <ModalTarea />
+      <FormEpica />
+      <FormHistoria />
+      <FormTarea />
+      <ConfirmDialog />
       <Toast />
     </>
   )

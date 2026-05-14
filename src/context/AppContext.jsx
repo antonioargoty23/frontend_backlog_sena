@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { getProyecto, updateProyecto, getBacklog } from '../api/proyectos'
 import {
   createEpica, updateEpica, deleteEpica,
@@ -23,9 +23,28 @@ export function AppProvider({ children, proyectoId }) {
   const [huSeleccionada, setHuSeleccionada]     = useState(null)
 
   // Modales
-  const [modalEpica, setModalEpica] = useState({ open: false })
+  const [modalEpica, setModalEpica] = useState({ open: false, editData: null })
   const [modalHU, setModalHU]       = useState({ open: false, editData: null, epicaId: null })
   const [modalTarea, setModalTarea] = useState({ open: false, editData: null, huActual: null })
+
+  // Confirm dialog
+  const [confirmState, setConfirmState] = useState({ open: false, title: null, message: null, confirmLabel: null, danger: true })
+  const confirmResolver = useRef(null)
+
+  function askConfirm(opts) {
+    return new Promise(resolve => {
+      confirmResolver.current = resolve
+      setConfirmState({ open: true, danger: true, ...opts })
+    })
+  }
+
+  function resolveConfirm(result) {
+    setConfirmState({ open: false, title: null, message: null, confirmLabel: null, danger: true })
+    if (confirmResolver.current) {
+      confirmResolver.current(result)
+      confirmResolver.current = null
+    }
+  }
 
   // Toast
   const [toastMsg, setToastMsg] = useState(null)
@@ -84,8 +103,16 @@ export function AppProvider({ children, proyectoId }) {
   // ── Épicas ────────────────────────────────────────────────────────────────────
   async function addEpica(data) {
     const res = await createEpica(proyecto.id, data)
-    setEpicas(prev => [...prev, res.data])
-    showToast(`✔ Épica ${res.data.codigo ?? res.data.id} creada`)
+    const nueva = res.data?.data ?? res.data
+    setEpicas(prev => [...prev, nueva])
+    showToast(`✔ Épica ${nueva.codigo ?? nueva.id} creada`)
+  }
+
+  async function editEpica(epicaId, data) {
+    const res = await updateEpica(proyecto.id, epicaId, data)
+    const updated = res.data?.data ?? res.data
+    setEpicas(prev => prev.map(e => e.id === epicaId ? { ...e, ...updated } : e))
+    showToast('✔ Épica actualizada')
   }
 
   async function removeEpica(epicaId) {
@@ -153,8 +180,9 @@ export function AppProvider({ children, proyectoId }) {
       modalEpica, setModalEpica,
       modalHU, setModalHU,
       modalTarea, setModalTarea,
+      confirmState, askConfirm, resolveConfirm,
       toastMsg,
-      addEpica, removeEpica,
+      addEpica, editEpica, removeEpica,
       addHistoria, editHistoria, removeHistoria,
       addTarea, editTarea, removeTarea,
       syncProyecto,
