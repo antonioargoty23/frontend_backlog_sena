@@ -61,7 +61,16 @@ export function AppProvider({ children, proyectoId }) {
     getProyecto(proyectoId)
       .then(res => {
         const p = res.data?.data ?? res.data
-        setProyecto({ id: p.id, nombre: p.nombre, dueno: p.dueno ?? '' })
+        setProyecto({
+          id:          p.id,
+          nombre:      p.nombre      ?? '',
+          dueno:       p.dueno       ?? '',
+          descripcion: p.descripcion ?? '',
+          integrantes: p.integrantes ?? '',
+          ficha:       p.ficha       ?? null,
+          fichaId:     p.ficha_id    ?? p.fichaId ?? null,
+          creadoEn:    p.created_at  ?? p.createdAt ?? null,
+        })
         return getBacklog(proyectoId)
       })
       .then(res => {
@@ -171,6 +180,20 @@ export function AppProvider({ children, proyectoId }) {
     await updateProyecto(proyecto.id, { nombre, dueno }).catch(console.error)
   }
 
+  async function updateInfoProyecto(data) {
+    await updateProyecto(proyecto.id, data)
+    setProyecto(p => ({
+      ...p,
+      nombre:      data.nombre      ?? p.nombre,
+      descripcion: data.descripcion ?? p.descripcion,
+      integrantes: data.integrantes ?? p.integrantes,
+      fichaId:     data.ficha_id    ?? p.fichaId,
+      // Limpia el objeto ficha si cambió para evitar mostrar datos desactualizados
+      ficha:       data.ficha_id && data.ficha_id !== p.fichaId ? null : p.ficha,
+    }))
+    showToast('✔ Proyecto actualizado')
+  }
+
   return (
     <AppContext.Provider value={{
       proyecto, epicas, historias, tareas, stats, loading,
@@ -185,7 +208,7 @@ export function AppProvider({ children, proyectoId }) {
       addEpica, editEpica, removeEpica,
       addHistoria, editHistoria, removeHistoria,
       addTarea, editTarea, removeTarea,
-      syncProyecto,
+      syncProyecto, updateInfoProyecto,
     }}>
       {children}
     </AppContext.Provider>

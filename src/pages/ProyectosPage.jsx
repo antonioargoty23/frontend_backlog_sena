@@ -1,8 +1,152 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getProyectos } from '../api/proyectos'
+import { getProyectos, createProyecto } from '../api/proyectos'
+import FichaSelector from '../components/FichaSelector'
 import '../styles/proyectos.css'
+
+const MODAL_EMPTY = { nombre: '', descripcion: '', ficha_id: '', integrantes: '' }
+
+function ErrMsg({ msg }) {
+  if (!msg) return null
+  return (
+    <span className="form-error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {msg}
+    </span>
+  )
+}
+
+function ModalNuevoProyecto({ onCreated, onClose }) {
+  const { usuario }         = useAuth()
+  const [form, setForm]     = useState(MODAL_EMPTY)
+  const [errors, setErrors] = useState({})
+  const [saving, setSaving] = useState(false)
+
+  const set = (field) => (e) =>
+    setForm(f => ({ ...f, [field]: e.target.value }))
+
+  const validate = () => {
+    const errs = {}
+    if (!form.nombre.trim()) errs.nombre   = 'El nombre es obligatorio.'
+    if (!form.ficha_id)      errs.ficha_id = 'Selecciona una ficha.'
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const handleSave = async () => {
+    if (!validate()) return
+    setSaving(true)
+    try {
+      await createProyecto({
+        nombre:      form.nombre.trim(),
+        descripcion: form.descripcion.trim(),
+        integrantes: form.integrantes.trim(),
+        ficha_id:    Number(form.ficha_id),
+        dueno_id:    usuario.id,
+      })
+      onCreated()
+    } catch {
+      setSaving(false)
+    }
+  }
+
+  const handleKey = (e) => {
+    if (e.key === 'Escape') onClose()
+  }
+
+  return (
+    <div className="modal-overlay open" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal modal-nuevo-proyecto" onKeyDown={handleKey}>
+
+        <div className="modal-header">
+          <div className="modal-title">
+            <span className="modal-title-badge ep">PR</span>
+            Nuevo Proyecto
+          </div>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="modal-body">
+
+          {/* Nombre */}
+          <div className="form-row">
+            <div className="form-label-row">
+              <label className="form-label req">Nombre del proyecto</label>
+              <span className={`form-char-count${form.nombre.length > 90 ? ' at-max' : form.nombre.length > 70 ? ' near' : ''}`}>
+                {form.nombre.length}/100
+              </span>
+            </div>
+            <input
+              className={`form-input${errors.nombre ? ' invalid' : ''}`}
+              type="text"
+              value={form.nombre}
+              onChange={set('nombre')}
+              placeholder="Ej. Sistema de gestión académica SENA"
+              maxLength={100}
+              autoFocus
+            />
+            <ErrMsg msg={errors.nombre} />
+          </div>
+
+          {/* Descripción */}
+          <div className="form-row">
+            <div className="form-label-row">
+              <label className="form-label">Descripción</label>
+              <span className={`form-char-count${form.descripcion.length > 230 ? ' at-max' : form.descripcion.length > 180 ? ' near' : ''}`}>
+                {form.descripcion.length}/250
+              </span>
+            </div>
+            <textarea
+              className="form-textarea"
+              value={form.descripcion}
+              onChange={set('descripcion')}
+              placeholder="Describe brevemente el objetivo del proyecto…"
+              maxLength={250}
+              style={{ minHeight: 72 }}
+            />
+          </div>
+
+          {/* Ficha */}
+          <div className="form-row">
+            <label className="form-label req">Ficha del programa</label>
+            <FichaSelector
+              value={form.ficha_id}
+              onChange={id => setForm(f => ({ ...f, ficha_id: id }))}
+              invalid={!!errors.ficha_id}
+            />
+            <ErrMsg msg={errors.ficha_id} />
+          </div>
+
+          {/* Integrantes */}
+          <div className="form-row">
+            <label className="form-label">Integrantes del equipo</label>
+            <textarea
+              className="form-textarea"
+              value={form.integrantes}
+              onChange={set('integrantes')}
+              placeholder="Adriana Eraso, Sara Campo, Andrea Eraso…"
+              style={{ minHeight: 64 }}
+            />
+          </div>
+
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn-modal-cancel" onClick={onClose}>Cancelar</button>
+          <button className="btn-modal-save" onClick={handleSave} disabled={saving}>
+            {saving ? 'Guardando…' : 'Crear proyecto'}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  )
+}
 
 export default function ProyectosPage() {
   const { usuario } = useAuth()
@@ -12,15 +156,19 @@ export default function ProyectosPage() {
   const [filtro, setFiltro]       = useState('')
   const [cargando, setCargando]   = useState(true)
   const [error, setError]         = useState(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const esInstructor = usuario?.rol?.nombre === 'instructor'
 
-  useEffect(() => {
+  const cargarProyectos = useCallback(() => {
+    setCargando(true)
     getProyectos()
       .then(res => setProyectos(res.data?.data ?? []))
       .catch(() => setError('No se pudieron cargar los proyectos.'))
       .finally(() => setCargando(false))
   }, [])
+
+  useEffect(() => { cargarProyectos() }, [cargarProyectos])
 
   const proyectosFiltrados = proyectos.filter(p =>
     p.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
@@ -53,7 +201,7 @@ export default function ProyectosPage() {
           </button>
 
           {esInstructor && (
-            <button className="dash-nuevo-btn" onClick={() => navigate('/dashboard')}>
+            <button className="dash-nuevo-btn" onClick={() => setModalOpen(true)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -67,7 +215,6 @@ export default function ProyectosPage() {
       {/* ── Body ── */}
       <div className="proyectos-body">
 
-        {/* Toolbar */}
         <div className="proyectos-toolbar">
           <input
             className="proyectos-search"
@@ -81,7 +228,6 @@ export default function ProyectosPage() {
           </span>
         </div>
 
-        {/* Lista */}
         {cargando && (
           <div className="dash-loading">Cargando proyectos…</div>
         )}
@@ -155,6 +301,13 @@ export default function ProyectosPage() {
         )}
 
       </div>
+
+      {modalOpen && (
+        <ModalNuevoProyecto
+          onCreated={() => { setModalOpen(false); cargarProyectos() }}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </div>
   )
 }

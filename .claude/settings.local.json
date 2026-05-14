@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cp /d/web_ia_estudio/backlog-sena/assets/logoSena.png /d/web_ia_estudio/backlog-sena-frontend/src/assets/logoSena.png && echo \"Logo copiado\")",
       "Bash(cat /d/web_ia_estudio/backlog_sena_backend/app/controllers/instructor_controller.ts)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(node ace *)"
     ]
   }
 }

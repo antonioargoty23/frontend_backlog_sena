@@ -70,4 +70,121 @@
   transition: all var(--transition);
 }
 .project-info-toggle:hover { background: var(--bg-page); border-color: var(--border-medium); }
-.project-info-toggle svg { width: 14px; height: 14px; }
+.project-info-toggle.open  { background: var(--sena-green-light); border-color: var(--sena-green-border); color: var(--sena-green); }
+.project-info-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--transition);
+}
+.project-info-toggle.open svg { transform: rotate(180deg); }
+
+/* ══════════════════════════════════════════════
+   PANEL DE INFORMACIÓN DEL PROYECTO
+   ══════════════════════════════════════════════ */
+.project-info-panel {
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
+  padding: 20px 32px;
+  box-shadow: var(--shadow-sm);
+  animation: pipSlide 0.18s ease;
+}
+
+@keyframes pipSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px 28px;
+  margin-bottom: 16px;
+}
+
+.pip-field--wide   { grid-column: span 3; }
+.pip-field--span2  { grid-column: span 2; }
+
+@media (max-width: 900px) {
+  .pip-grid { grid-template-columns: 1fr 1fr; }
+  .pip-field--wide,
+  .pip-field--span2 { grid-column: span 2; }
+}
+
+.pip-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.pip-value {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.pip-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-page);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.pip-input:focus {
+  border-color: var(--sena-green);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 3px var(--sena-green-light);
+}
+
+.pip-textarea {
+  resize: vertical;
+  min-height: 64px;
+  font-family: inherit;
+  line-height: 1.45;
+}
+
+.pip-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+
+.pip-footer--readonly { justify-content: flex-start; }
+
+.pip-cancel {
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.pip-cancel:hover { background: var(--border-light); }
+
+.pip-save {
+  padding: 7px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--sena-green);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.pip-save:hover:not(:disabled) { background: var(--sena-green-dark); }
+.pip-save:disabled { opacity: 0.55; cursor: not-allowed; }

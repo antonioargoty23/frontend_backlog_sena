@@ -227,3 +227,28 @@ input[type="range"].form-slider::-moz-range-thumb {
   color: #fff;
 }
 .btn-confirm-ok.primary:hover { background: var(--sena-green-dark); }
+
+/* ══════════════════════════════════════════════
+   SELECTOR DE FICHA CON BOTÓN "+ Nueva ficha"
+   ══════════════════════════════════════════════ */
+.ficha-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ficha-selector-wrap .form-select { flex: 1; }
+
+.btn-nueva-ficha {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--sena-green);
+  background: var(--sena-green-light);
+  border: 1px solid var(--sena-green-border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-nueva-ficha:hover { background: var(--sena-green-border); }
