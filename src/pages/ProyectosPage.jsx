@@ -2,10 +2,11 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getProyectos, createProyecto } from '../api/proyectos'
+import { getUsuarios } from '../api/usuarios'
 import FichaSelector from '../components/FichaSelector'
 import '../styles/proyectos.css'
 
-const MODAL_EMPTY = { nombre: '', descripcion: '', ficha_id: '', integrantes: '' }
+const MODAL_EMPTY = { nombre: '', descripcion: '', ficha_id: '', dueno: '', integrantes: '' }
 
 function ErrMsg({ msg }) {
   if (!msg) return null
@@ -21,6 +22,144 @@ function ErrMsg({ msg }) {
   )
 }
 
+function ModalNuevoInstructor({ onCreated, onClose }) {
+  const [form, setForm]     = useState({ nombre: '', apellido: '', email: '', password: 'password123', ficha_id: '' })
+  const [errors, setErrors] = useState({})
+  const [saving, setSaving] = useState(false)
+
+  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
+
+  const validate = () => {
+    const errs = {}
+    if (!form.nombre.trim())   errs.nombre   = 'El nombre es obligatorio.'
+    if (!form.apellido.trim()) errs.apellido = 'El apellido es obligatorio.'
+    if (!form.email.trim())    errs.email    = 'El correo es obligatorio.'
+    if (!form.password)        errs.password = 'La contraseña es obligatoria.'
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const handleSave = async () => {
+    if (!validate()) return
+    setSaving(true)
+    try {
+      const payload = {
+        nombre:   form.nombre.trim(),
+        apellido: form.apellido.trim(),
+        email:    form.email.trim(),
+        password: form.password,
+        ...(form.ficha_id ? { ficha_id: Number(form.ficha_id) } : {}),
+      }
+      const res = await createUsuario(payload)
+      onCreated(res.data?.data ?? res.data)
+    } catch {
+      setSaving(false)
+    }
+  }
+
+  const handleKey = (e) => {
+    if (e.key === 'Escape') onClose()
+  }
+
+  return (
+    <div
+      className="modal-overlay open"
+      style={{ zIndex: 1100 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="modal" style={{ maxWidth: 460 }} onKeyDown={handleKey}>
+
+        <div className="modal-header">
+          <div className="modal-title">
+            <span className="modal-title-badge" style={{ background: '#e0f2fe', color: '#0369a1' }}>IN</span>
+            Nuevo Instructor
+          </div>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="modal-body">
+
+          <div className="form-grid">
+            <div className="form-row">
+              <label className="form-label req">Nombre</label>
+              <input
+                className={`form-input${errors.nombre ? ' invalid' : ''}`}
+                type="text"
+                value={form.nombre}
+                onChange={set('nombre')}
+                placeholder="Ej. Carlos"
+                maxLength={100}
+                autoFocus
+              />
+              <ErrMsg msg={errors.nombre} />
+            </div>
+            <div className="form-row">
+              <label className="form-label req">Apellido</label>
+              <input
+                className={`form-input${errors.apellido ? ' invalid' : ''}`}
+                type="text"
+                value={form.apellido}
+                onChange={set('apellido')}
+                placeholder="Ej. Ramírez"
+                maxLength={100}
+              />
+              <ErrMsg msg={errors.apellido} />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <label className="form-label req">Correo electrónico</label>
+            <input
+              className={`form-input${errors.email ? ' invalid' : ''}`}
+              type="email"
+              value={form.email}
+              onChange={set('email')}
+              placeholder="instructor@sena.edu.co"
+              maxLength={150}
+            />
+            <ErrMsg msg={errors.email} />
+          </div>
+
+          <div className="form-row">
+            <label className="form-label req">Contraseña inicial</label>
+            <input
+              className={`form-input${errors.password ? ' invalid' : ''}`}
+              type="text"
+              value={form.password}
+              onChange={set('password')}
+              placeholder="password123"
+              maxLength={100}
+            />
+            <ErrMsg msg={errors.password} />
+          </div>
+
+          <div className="form-row">
+            <label className="form-label">Rol</label>
+            <input className="form-input" type="text" value="Instructor" disabled />
+          </div>
+
+          <div className="form-row">
+            <label className="form-label">Ficha asignada</label>
+            <FichaSelector
+              value={form.ficha_id}
+              onChange={id => setForm(f => ({ ...f, ficha_id: id }))}
+            />
+          </div>
+
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn-modal-cancel" onClick={onClose}>Cancelar</button>
+          <button className="btn-modal-save" onClick={handleSave} disabled={saving}>
+            {saving ? 'Guardando…' : 'Crear instructor'}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 function ModalNuevoProyecto({ onCreated, onClose }) {
   const { usuario }         = useAuth()
   const [form, setForm]     = useState(MODAL_EMPTY)
@@ -33,6 +172,7 @@ function ModalNuevoProyecto({ onCreated, onClose }) {
   const validate = () => {
     const errs = {}
     if (!form.nombre.trim()) errs.nombre   = 'El nombre es obligatorio.'
+    if (!form.dueno.trim())  errs.dueno    = 'El dueño es obligatorio.'
     if (!form.ficha_id)      errs.ficha_id = 'Selecciona una ficha.'
     setErrors(errs)
     return Object.keys(errs).length === 0
@@ -46,6 +186,7 @@ function ModalNuevoProyecto({ onCreated, onClose }) {
         nombre:      form.nombre.trim(),
         descripcion: form.descripcion.trim(),
         integrantes: form.integrantes.trim(),
+        dueno:       form.dueno.trim(),
         ficha_id:    Number(form.ficha_id),
         dueno_id:    usuario.id,
       })
@@ -109,6 +250,19 @@ function ModalNuevoProyecto({ onCreated, onClose }) {
               maxLength={250}
               style={{ minHeight: 72 }}
             />
+          </div>
+
+          {/* Dueño / Product Owner */}
+          <div className="form-row">
+            <label className="form-label req">Dueño / Product Owner</label>
+            <input
+              className={`form-input${errors.dueno ? ' invalid' : ''}`}
+              type="text"
+              value={form.dueno}
+              onChange={set('dueno')}
+              placeholder="Nombre del Product Owner"
+            />
+            <ErrMsg msg={errors.dueno} />
           </div>
 
           {/* Ficha */}
