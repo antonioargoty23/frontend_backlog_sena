@@ -1,0 +1,288 @@
+/* ═══════════════════════════════════════════════
+   ADMIN PAGE
+   ═══════════════════════════════════════════════ */
+
+.admin-page {
+  min-height: 100vh;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Cabecera ── */
+.admin-header {
+  background: var(--sena-green-dark);
+  color: #fff;
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.admin-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.admin-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.admin-back-btn:hover { background: rgba(255,255,255,0.22); }
+.admin-back-btn svg   { width: 15px; height: 15px; }
+
+/* ── Cuerpo ── */
+.admin-body {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 24px;
+}
+
+/* ── Pestañas ── */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border-light);
+  margin-bottom: 24px;
+}
+
+.admin-tab {
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all var(--transition);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.admin-tab:hover { color: var(--sena-green); background: var(--sena-green-light); }
+.admin-tab.active {
+  color: var(--sena-green-dark);
+  border-bottom-color: var(--sena-green);
+  background: transparent;
+}
+
+/* ── Barra de acciones ── */
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Tabla ── */
+.admin-table-wrap {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table thead {
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.admin-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.admin-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--bg-page);
+}
+
+/* ── Badges de rol/estado ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.badge-instructor { background: var(--sena-green-light); color: var(--sena-green-dark); border: 1px solid var(--sena-green-border); }
+.badge-aprendiz   { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.badge-activo     { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.badge-inactivo   { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+/* ── Celda de acciones ── */
+.admin-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-admin-toggle {
+  padding: 4px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-admin-toggle.activar {
+  color: var(--sena-green-dark);
+  background: var(--sena-green-light);
+  border-color: var(--sena-green-border);
+}
+.btn-admin-toggle.activar:hover { background: var(--sena-green-border); }
+.btn-admin-toggle.desactivar {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fde68a;
+}
+.btn-admin-toggle.desactivar:hover { background: #fde68a; }
+
+.btn-admin-delete {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #fca5a5;
+  color: var(--priority-alta-text);
+  background: #fff5f5;
+  transition: all var(--transition);
+}
+.btn-admin-delete:hover { background: #fde8e8; }
+
+/* ── Estado vacío / cargando ── */
+.admin-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Diálogo de confirmación inline ── */
+.admin-confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,20,30,0.55);
+  backdrop-filter: blur(3px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.admin-confirm-box {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  max-width: 380px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  padding: 28px 28px 22px;
+  text-align: center;
+  animation: modalIn 0.18s ease;
+}
+
+.admin-confirm-icon {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: #fff0f0;
+  color: var(--priority-alta-text);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+}
+.admin-confirm-icon svg { width: 24px; height: 24px; }
+
+.admin-confirm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.admin-confirm-msg {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+.admin-confirm-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-confirm-cancel-sm {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-confirm-cancel-sm:hover { background: var(--border-light); }
+
+.btn-confirm-delete-sm {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--priority-alta-text);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.btn-confirm-delete-sm:hover { background: #a93226; }

@@ -6,6 +6,7 @@ import LoginPage      from './pages/LoginPage'
 import DashboardPage  from './pages/DashboardPage'
 import ProyectosPage  from './pages/ProyectosPage'
 import BacklogPage    from './pages/BacklogPage'
+import AdminPage      from './pages/AdminPage'
 
 function BacklogRoute() {
   const { id } = useParams()
@@ -40,6 +41,12 @@ export default function App() {
           <Route path="/proyectos/:id" element={
             <ProtectedRoute>
               <BacklogRoute />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminPage />
             </ProtectedRoute>
           } />
 
