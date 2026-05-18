@@ -17,21 +17,24 @@ function ErrMsg({ msg }) {
   )
 }
 
+const EMPTY = { codigo: '', rol: '', deseo: '', para: '' }
+
 export default function FormEpica() {
   const { epicas, modalEpica, setModalEpica, addEpica, editEpica } = useApp()
   const { open, editData } = modalEpica
   const isEdit = !!editData
 
-  const [form, setForm]   = useState({ codigo: '', titulo: '', descripcion: '' })
+  const [form, setForm]     = useState(EMPTY)
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return
     setForm({
-      codigo:      editData?.codigo ?? editData?.id ?? `EP${String(epicas.length + 1).padStart(2, '0')}`,
-      titulo:      editData?.titulo ?? '',
-      descripcion: editData?.descripcion ?? editData?.deseo ?? '',
+      codigo: editData?.codigo ?? `EP${String(epicas.length + 1).padStart(2, '0')}`,
+      rol:    editData?.rol   ?? '',
+      deseo:  editData?.deseo ?? '',
+      para:   editData?.para  ?? '',
     })
     setErrors({})
     setSaving(false)
@@ -43,8 +46,10 @@ export default function FormEpica() {
 
   const validate = () => {
     const errs = {}
-    if (!EP_RE.test(form.codigo.trim()))  errs.codigo = 'Formato requerido: EP01, EP02…'
-    if (!form.titulo.trim())              errs.titulo  = 'El título es obligatorio.'
+    if (!EP_RE.test(form.codigo.trim())) errs.codigo = 'Formato requerido: EP01, EP02…'
+    if (!form.rol.trim())               errs.rol    = 'El rol es obligatorio.'
+    if (!form.deseo.trim())             errs.deseo  = 'Este campo es obligatorio.'
+    if (!form.para.trim())              errs.para   = 'Este campo es obligatorio.'
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -56,10 +61,10 @@ export default function FormEpica() {
     setSaving(true)
     try {
       const payload = {
-        codigo:      form.codigo.trim().toUpperCase(),
-        titulo:      form.titulo.trim(),
-        descripcion: form.descripcion.trim(),
-        deseo:       form.descripcion.trim(),
+        codigo: form.codigo.trim().toUpperCase(),
+        rol:    form.rol.trim(),
+        deseo:  form.deseo.trim(),
+        para:   form.para.trim(),
       }
       if (isEdit) {
         await editEpica(editData.id, payload)
@@ -72,11 +77,9 @@ export default function FormEpica() {
     }
   }
 
-  const handleKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) handleSave() }
-
   return (
     <div className="modal-overlay open" onClick={(e) => { if (e.target === e.currentTarget) close() }}>
-      <div className="modal" onKeyDown={handleKey}>
+      <div className="modal">
 
         <div className="modal-header">
           <div className="modal-title">
@@ -109,41 +112,46 @@ export default function FormEpica() {
             <span className="form-hint">Formato EPnn — dos o más dígitos después de «EP».</span>
           </div>
 
-          {/* Título */}
+          {/* Como (Rol) */}
           <div className="form-row">
-            <div className="form-label-row">
-              <label className="form-label req">Título de la Épica</label>
-              <span className={`form-char-count${form.titulo.length > 90 ? ' at-max' : form.titulo.length > 70 ? ' near' : ''}`}>
-                {form.titulo.length}/100
-              </span>
-            </div>
+            <label className="form-label req">Como… (Rol)</label>
             <input
-              className={`form-input${errors.titulo ? ' invalid' : ''}`}
+              className={`form-input${errors.rol ? ' invalid' : ''}`}
               type="text"
-              value={form.titulo}
-              onChange={set('titulo')}
-              placeholder="Ej. Gestión de reportes académicos"
-              maxLength={100}
+              value={form.rol}
+              onChange={set('rol')}
+              placeholder="Usuario, Administrador, Instructor…"
+              maxLength={150}
             />
-            <ErrMsg msg={errors.titulo} />
+            <ErrMsg msg={errors.rol} />
           </div>
 
-          {/* Descripción */}
+          {/* Deseo */}
           <div className="form-row">
-            <div className="form-label-row">
-              <label className="form-label">Descripción</label>
-              <span className={`form-char-count${form.descripcion.length > 230 ? ' at-max' : form.descripcion.length > 180 ? ' near' : ''}`}>
-                {form.descripcion.length}/250
-              </span>
-            </div>
+            <label className="form-label req">Deseo…</label>
             <textarea
-              className="form-textarea"
-              value={form.descripcion}
-              onChange={set('descripcion')}
-              placeholder="Describe el objetivo de esta épica y el valor que aporta al proyecto…"
-              maxLength={250}
-              style={{ minHeight: 80 }}
+              className={`form-textarea${errors.deseo ? ' invalid' : ''}`}
+              value={form.deseo}
+              onChange={set('deseo')}
+              placeholder="registrarme e iniciar sesión en la plataforma"
+              maxLength={500}
+              style={{ minHeight: 72 }}
             />
+            <ErrMsg msg={errors.deseo} />
+          </div>
+
+          {/* Para */}
+          <div className="form-row">
+            <label className="form-label req">Para…</label>
+            <textarea
+              className={`form-textarea${errors.para ? ' invalid' : ''}`}
+              value={form.para}
+              onChange={set('para')}
+              placeholder="acceder a los cursos del programa"
+              maxLength={500}
+              style={{ minHeight: 72 }}
+            />
+            <ErrMsg msg={errors.para} />
           </div>
 
         </div>
