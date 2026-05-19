@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 
-const FIBONACCI = [1, 2, 3, 5, 8, 13, 21]
-const PRIORIDADES = ['Alta', 'Media', 'Baja']
-const ESTADOS = ['Por hacer', 'En progreso', 'Hecho']
-const HU_RE = /^[A-Z]{1,3}\d{2,}$/i
-
 function ErrMsg({ msg }) {
   if (!msg) return null
   return (
@@ -20,11 +15,7 @@ function ErrMsg({ msg }) {
   )
 }
 
-const EMPTY = {
-  codigo: '', nombre: '', rol: '', deseo: '', para: '',
-  criterios: '', prioridad: 'Alta', sp: '3',
-  sprint: '1', estado: 'Por hacer', responsable: '', comentarios: '',
-}
+const EMPTY = { codigo: '', epicaId: '', rol: '', deseo: '', para: '', criterios_aceptacion: '' }
 
 export default function FormHistoria() {
   const { epicas, historias, modalHU, setModalHU, addHistoria, editHistoria } = useApp()
@@ -39,24 +30,18 @@ export default function FormHistoria() {
     if (!open) return
     if (isEdit) {
       setForm({
-        codigo:      editData.codigo ?? editData.id ?? '',
-        nombre:      editData.nombre ?? '',
-        rol:         editData.rol ?? '',
-        deseo:       editData.deseo ?? '',
-        para:        editData.para ?? '',
-        criterios:   editData.criterios ?? '',
-        prioridad:   editData.prioridad ?? 'Alta',
-        sp:          String(editData.sp ?? '3'),
-        sprint:      String(editData.sprint ?? '1'),
-        estado:      editData.estado ?? 'Por hacer',
-        responsable: editData.responsable ?? '',
-        comentarios: editData.comentarios ?? '',
+        codigo:               editData.codigo ?? '',
+        epicaId:              editData.epicaId ?? epicaId ?? epicas[0]?.id ?? '',
+        rol:                  editData.rol   ?? '',
+        deseo:                editData.deseo ?? '',
+        para:                 editData.para  ?? '',
+        criterios_aceptacion: editData.criterios ?? '',
       })
     } else {
       setForm({
         ...EMPTY,
-        codigo:   `HU${String(historias.length + 1).padStart(2, '0')}`,
-        epicaId:  epicaId ?? epicas[0]?.id ?? '',
+        codigo:  `HU${String(historias.length + 1).padStart(2, '0')}`,
+        epicaId: epicaId ?? epicas[0]?.id ?? '',
       })
     }
     setErrors({})
@@ -67,12 +52,13 @@ export default function FormHistoria() {
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
 
-  const selectedEpicaId = form.epicaId ?? epicaId ?? epicas[0]?.id ?? ''
-
   const validate = () => {
     const errs = {}
-    if (!form.codigo.trim())  errs.codigo = 'El código es obligatorio.'
-    if (!form.nombre.trim())  errs.nombre = 'El título es obligatorio.'
+    if (!form.codigo.trim()) errs.codigo = 'El código es obligatorio.'
+    if (!form.epicaId)       errs.epicaId = 'Selecciona una épica.'
+    if (!form.rol.trim())    errs.rol     = 'El rol es obligatorio.'
+    if (!form.deseo.trim())  errs.deseo   = 'Este campo es obligatorio.'
+    if (!form.para.trim())   errs.para    = 'Este campo es obligatorio.'
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -83,8 +69,14 @@ export default function FormHistoria() {
     if (!validate()) return
     setSaving(true)
     try {
-      const payload = { ...form, codigo: form.codigo.trim(), nombre: form.nombre.trim() }
-      const eId = form.epicaId ?? epicaId ?? epicas[0]?.id
+      const payload = {
+        codigo:               form.codigo.trim(),
+        rol:                  form.rol.trim(),
+        deseo:                form.deseo.trim(),
+        para:                 form.para.trim(),
+        criterios_aceptacion: form.criterios_aceptacion.trim() || undefined,
+      }
+      const eId = Number(form.epicaId) || epicaId || epicas[0]?.id
       if (isEdit) {
         await editHistoria(eId, editData.id, payload)
       } else {
@@ -98,7 +90,7 @@ export default function FormHistoria() {
 
   return (
     <div className="modal-overlay open" onClick={(e) => { if (e.target === e.currentTarget) close() }}>
-      <div className="modal" style={{ maxWidth: 640 }}>
+      <div className="modal" style={{ maxWidth: 620 }}>
 
         <div className="modal-header">
           <div className="modal-title">
@@ -110,136 +102,111 @@ export default function FormHistoria() {
 
         <div className="modal-body">
 
-          {/* Código + Épica */}
-          <div className="form-grid">
-            <div className="form-row">
-              <label className="form-label req">
-                Código
-                {form.codigo && <span className="form-code-preview hu">{form.codigo}</span>}
-              </label>
-              <input
-                className={`form-input mono${errors.codigo ? ' invalid' : ''}`}
-                type="text"
-                value={form.codigo}
-                onChange={set('codigo')}
-                placeholder="HU01"
-                maxLength={12}
-                autoFocus
-              />
-              <ErrMsg msg={errors.codigo} />
-            </div>
-            <div className="form-row">
-              <label className="form-label req">Épica</label>
-              <select
-                className="form-select"
-                value={form.epicaId ?? epicaId ?? ''}
-                onChange={set('epicaId')}
-              >
-                {epicas.map(e => (
-                  <option key={e.id} value={e.id}>
-                    {e.codigo ?? e.id} · {e.titulo}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          {/* ── SECCIÓN 1: Identificación ── */}
+          <div className="form-section" style={{ border: 'none', paddingTop: 0 }}>
+            <div className="form-section-title">Identificación</div>
 
-          {/* Título */}
-          <div className="form-row">
-            <div className="form-label-row">
-              <label className="form-label req">Título / Nombre</label>
-              <span className={`form-char-count${form.nombre.length > 90 ? ' at-max' : form.nombre.length > 70 ? ' near' : ''}`}>
-                {form.nombre.length}/100
-              </span>
-            </div>
-            <input
-              className={`form-input${errors.nombre ? ' invalid' : ''}`}
-              type="text"
-              value={form.nombre}
-              onChange={set('nombre')}
-              placeholder="Ej. Consulta de notas por período académico"
-              maxLength={100}
-            />
-            <ErrMsg msg={errors.nombre} />
-          </div>
-
-          {/* SP + Prioridad */}
-          <div className="form-grid">
-            <div className="form-row">
-              <label className="form-label req">Story Points</label>
-              <select className="form-select" value={form.sp} onChange={set('sp')}>
-                {FIBONACCI.map(n => (
-                  <option key={n} value={String(n)}>{n} SP</option>
-                ))}
-              </select>
-              <span className="form-hint">Escala Fibonacci: {FIBONACCI.join(' · ')}</span>
-            </div>
-            <div className="form-row">
-              <label className="form-label req">Prioridad</label>
-              <select className="form-select" value={form.prioridad} onChange={set('prioridad')}>
-                {PRIORIDADES.map(p => <option key={p}>{p}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Criterios de aceptación */}
-          <div className="form-row">
-            <div className="form-label-row">
-              <label className="form-label req">Criterios de Aceptación</label>
-              <span className="form-hint" style={{ marginTop: 0 }}>Un criterio por línea</span>
-            </div>
-            <textarea
-              className={`form-textarea${errors.criterios ? ' invalid' : ''}`}
-              value={form.criterios}
-              onChange={set('criterios')}
-              placeholder={'El sistema muestra los datos correctamente.\nSolo usuarios autenticados pueden acceder.\nSe validan los campos requeridos.'}
-              style={{ minHeight: 90 }}
-              maxLength={1000}
-            />
-          </div>
-
-          {/* ── Datos adicionales (colapsables implícitamente) ── */}
-          <div className="form-section">
-            <div className="form-section-title">Datos de la historia (formato ágil)</div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
-              <div className="form-row">
-                <label className="form-label">Como (Rol)</label>
-                <input className="form-input" type="text" value={form.rol} onChange={set('rol')} placeholder="Ej. aprendiz, instructor, coordinador…" />
-              </div>
-              <div className="form-row">
-                <label className="form-label">Deseo…</label>
-                <textarea className="form-textarea" value={form.deseo} onChange={set('deseo')} placeholder="Deseo poder ver mi progreso académico…" style={{ minHeight: 60 }} />
-              </div>
-              <div className="form-row">
-                <label className="form-label">Para…</label>
-                <textarea className="form-textarea" value={form.para} onChange={set('para')} placeholder="Para tomar decisiones sobre mi aprendizaje." style={{ minHeight: 56 }} />
-              </div>
-            </div>
-          </div>
-
-          {/* ── Seguimiento ── */}
-          <div className="form-section">
-            <div className="form-section-title">Seguimiento</div>
             <div className="form-grid">
+              {/* Código */}
               <div className="form-row">
-                <label className="form-label">Sprint #</label>
-                <input className="form-input" type="number" min="1" value={form.sprint} onChange={set('sprint')} placeholder="1" />
+                <label className="form-label req">
+                  Código
+                  {form.codigo && (
+                    <span className="form-code-preview hu">{form.codigo.toUpperCase()}</span>
+                  )}
+                </label>
+                <input
+                  className={`form-input mono${errors.codigo ? ' invalid' : ''}`}
+                  type="text"
+                  value={form.codigo}
+                  onChange={set('codigo')}
+                  placeholder="HU01"
+                  maxLength={12}
+                  autoFocus
+                />
+                <ErrMsg msg={errors.codigo} />
               </div>
+
+              {/* Épica */}
               <div className="form-row">
-                <label className="form-label">Estado</label>
-                <select className="form-select" value={form.estado} onChange={set('estado')}>
-                  {ESTADOS.map(s => <option key={s}>{s}</option>)}
+                <label className="form-label req">Épica</label>
+                <select
+                  className={`form-select${errors.epicaId ? ' invalid' : ''}`}
+                  value={form.epicaId}
+                  onChange={set('epicaId')}
+                >
+                  <option value="">— Selecciona una épica —</option>
+                  {epicas.map(e => (
+                    <option key={e.id} value={e.id}>
+                      {e.codigo} · {e.rol ? `Como ${e.rol}` : e.titulo ?? e.id}
+                    </option>
+                  ))}
                 </select>
+                <ErrMsg msg={errors.epicaId} />
               </div>
-              <div className="form-row">
-                <label className="form-label">Responsable</label>
-                <input className="form-input" type="text" value={form.responsable} onChange={set('responsable')} placeholder="Nombre del integrante" />
+            </div>
+          </div>
+
+          {/* ── SECCIÓN 2: Datos de la Historia ── */}
+          <div className="form-section">
+            <div className="form-section-title">Datos de la Historia (formato ágil)</div>
+
+            {/* Como (Rol) */}
+            <div className="form-row" style={{ marginBottom: 13 }}>
+              <label className="form-label req">Como… (Rol)</label>
+              <input
+                className={`form-input${errors.rol ? ' invalid' : ''}`}
+                type="text"
+                value={form.rol}
+                onChange={set('rol')}
+                placeholder="aprendiz, instructor, coordinador…"
+                maxLength={150}
+              />
+              <ErrMsg msg={errors.rol} />
+            </div>
+
+            {/* Deseo */}
+            <div className="form-row" style={{ marginBottom: 13 }}>
+              <label className="form-label req">Deseo…</label>
+              <textarea
+                className={`form-textarea${errors.deseo ? ' invalid' : ''}`}
+                value={form.deseo}
+                onChange={set('deseo')}
+                placeholder="consultar mis notas del período académico actual"
+                maxLength={500}
+                style={{ minHeight: 68 }}
+              />
+              <ErrMsg msg={errors.deseo} />
+            </div>
+
+            {/* Para */}
+            <div className="form-row" style={{ marginBottom: 13 }}>
+              <label className="form-label req">Para…</label>
+              <textarea
+                className={`form-textarea${errors.para ? ' invalid' : ''}`}
+                value={form.para}
+                onChange={set('para')}
+                placeholder="tomar decisiones sobre mi proceso de aprendizaje"
+                maxLength={500}
+                style={{ minHeight: 68 }}
+              />
+              <ErrMsg msg={errors.para} />
+            </div>
+
+            {/* Criterios de Aceptación */}
+            <div className="form-row">
+              <div className="form-label-row">
+                <label className="form-label">Criterios de Aceptación</label>
+                <span className="form-hint" style={{ marginTop: 0 }}>Un criterio por línea</span>
               </div>
-              <div className="form-row">
-                <label className="form-label">Comentarios</label>
-                <input className="form-input" type="text" value={form.comentarios} onChange={set('comentarios')} placeholder="Observaciones…" />
-              </div>
+              <textarea
+                className="form-textarea"
+                value={form.criterios_aceptacion}
+                onChange={set('criterios_aceptacion')}
+                placeholder={'El sistema muestra los datos correctamente.\nSolo usuarios autenticados pueden acceder.\nSe validan los campos requeridos.'}
+                maxLength={1000}
+                style={{ minHeight: 90 }}
+              />
             </div>
           </div>
 
