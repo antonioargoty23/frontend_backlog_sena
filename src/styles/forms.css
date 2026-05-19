@@ -141,6 +141,23 @@ input[type="range"].form-slider::-moz-range-thumb {
 .form-code-preview.hu { background: var(--sena-green-light); color: var(--sena-green); border: 1px solid var(--sena-green-border); }
 .form-code-preview.tr { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
 
+/* ── Campo de solo lectura / auto-generado ── */
+.form-input.auto {
+  background: #f0f2f5;
+  color: var(--text-secondary);
+  cursor: default;
+  border-color: var(--border-light);
+  user-select: none;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.form-input.auto:focus {
+  border-color: var(--border-light);
+  box-shadow: none;
+  background: #f0f2f5;
+  outline: none;
+}
+
 /* ── Botón de guardar con loading ── */
 .btn-modal-save:disabled {
   opacity: 0.65;

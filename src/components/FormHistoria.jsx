@@ -15,7 +15,7 @@ function ErrMsg({ msg }) {
   )
 }
 
-const EMPTY = { codigo: '', epicaId: '', rol: '', deseo: '', para: '', criterios_aceptacion: '' }
+const EMPTY = { codigo: '', epicaId: '', como: '', deseo: '', para: '', criterios_aceptacion: '' }
 
 export default function FormHistoria() {
   const { epicas, historias, modalHU, setModalHU, addHistoria, editHistoria } = useApp()
@@ -26,22 +26,36 @@ export default function FormHistoria() {
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
 
+  // Calcula el siguiente código disponible para una épica dada,
+  // basándose en las historias ya cargadas en el estado global.
+  const getNextCodigo = (eId) => {
+    const num = Number(eId)
+    if (!num) return 'HU01'
+    const hus = historias.filter(h => (h.epicaId ?? h.epica_id) === num)
+    const usados = hus
+      .map(h => { const m = String(h.codigo ?? '').match(/^HU(\d+)$/i); return m ? parseInt(m[1], 10) : 0 })
+      .filter(n => n > 0)
+    const max = usados.length > 0 ? Math.max(...usados) : 0
+    return `HU${String(max + 1).padStart(2, '0')}`
+  }
+
   useEffect(() => {
     if (!open) return
     if (isEdit) {
       setForm({
-        codigo:               editData.codigo ?? '',
-        epicaId:              editData.epicaId ?? epicaId ?? epicas[0]?.id ?? '',
-        rol:                  editData.rol   ?? '',
-        deseo:                editData.deseo ?? '',
-        para:                 editData.para  ?? '',
+        codigo:               editData.codigo    ?? '',
+        epicaId:              editData.epicaId   ?? epicaId ?? epicas[0]?.id ?? '',
+        como:                 editData.rol       ?? '',
+        deseo:                editData.deseo     ?? '',
+        para:                 editData.para      ?? '',
         criterios_aceptacion: editData.criterios ?? '',
       })
     } else {
+      const eId = epicaId ?? epicas[0]?.id ?? ''
       setForm({
         ...EMPTY,
-        codigo:  `HU${String(historias.length + 1).padStart(2, '0')}`,
-        epicaId: epicaId ?? epicas[0]?.id ?? '',
+        codigo:  getNextCodigo(eId),
+        epicaId: eId,
       })
     }
     setErrors({})
@@ -52,11 +66,17 @@ export default function FormHistoria() {
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
 
+  // Al cambiar la épica regenera automáticamente el siguiente código disponible
+  const handleEpicaChange = (e) => {
+    const eId = e.target.value
+    setForm(f => ({ ...f, epicaId: eId, codigo: getNextCodigo(eId) }))
+  }
+
   const validate = () => {
     const errs = {}
     if (!form.codigo.trim()) errs.codigo = 'El código es obligatorio.'
     if (!form.epicaId)       errs.epicaId = 'Selecciona una épica.'
-    if (!form.rol.trim())    errs.rol     = 'El rol es obligatorio.'
+    if (!form.como.trim())   errs.como    = 'El rol es obligatorio.'
     if (!form.deseo.trim())  errs.deseo   = 'Este campo es obligatorio.'
     if (!form.para.trim())   errs.para    = 'Este campo es obligatorio.'
     setErrors(errs)
@@ -69,22 +89,30 @@ export default function FormHistoria() {
     if (!validate()) return
     setSaving(true)
     try {
+      const eId = Number(form.epicaId) || epicaId || epicas[0]?.id
       const payload = {
         codigo:               form.codigo.trim(),
-        rol:                  form.rol.trim(),
+        epica_id:             Number(eId),
+        como:                 form.como.trim(),
         deseo:                form.deseo.trim(),
         para:                 form.para.trim(),
         criterios_aceptacion: form.criterios_aceptacion.trim() || undefined,
       }
-      const eId = Number(form.epicaId) || epicaId || epicas[0]?.id
       if (isEdit) {
         await editHistoria(eId, editData.id, payload)
       } else {
         await addHistoria(eId, payload)
       }
       close()
-    } catch {
+    } catch (err) {
       setSaving(false)
+      const msg =
+        err?.response?.data?.errors?.[0]?.message ??
+        err?.response?.data?.message ??
+        err?.message ??
+        'Error al guardar la historia'
+      setErrors({ _global: msg })
+      console.error('[FormHistoria] Error al guardar:', err?.response?.data ?? err)
     }
   }
 
@@ -107,24 +135,28 @@ export default function FormHistoria() {
             <div className="form-section-title">Identificación</div>
 
             <div className="form-grid">
-              {/* Código */}
+              {/* Código — solo lectura, auto-generado por épica */}
               <div className="form-row">
-                <label className="form-label req">
+                <label className="form-label">
                   Código
                   {form.codigo && (
                     <span className="form-code-preview hu">{form.codigo.toUpperCase()}</span>
                   )}
                 </label>
                 <input
-                  className={`form-input mono${errors.codigo ? ' invalid' : ''}`}
+                  className="form-input mono auto"
                   type="text"
                   value={form.codigo}
-                  onChange={set('codigo')}
+                  readOnly
+                  tabIndex={-1}
                   placeholder="HU01"
-                  maxLength={12}
-                  autoFocus
                 />
-                <ErrMsg msg={errors.codigo} />
+                <span className="form-hint" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                  </svg>
+                  Generado automáticamente · cambia al elegir épica
+                </span>
               </div>
 
               {/* Épica */}
@@ -133,7 +165,8 @@ export default function FormHistoria() {
                 <select
                   className={`form-select${errors.epicaId ? ' invalid' : ''}`}
                   value={form.epicaId}
-                  onChange={set('epicaId')}
+                  onChange={handleEpicaChange}
+                  autoFocus={!isEdit}
                 >
                   <option value="">— Selecciona una épica —</option>
                   {epicas.map(e => (
@@ -155,14 +188,14 @@ export default function FormHistoria() {
             <div className="form-row" style={{ marginBottom: 13 }}>
               <label className="form-label req">Como… (Rol)</label>
               <input
-                className={`form-input${errors.rol ? ' invalid' : ''}`}
+                className={`form-input${errors.como ? ' invalid' : ''}`}
                 type="text"
-                value={form.rol}
-                onChange={set('rol')}
+                value={form.como}
+                onChange={set('como')}
                 placeholder="aprendiz, instructor, coordinador…"
                 maxLength={150}
               />
-              <ErrMsg msg={errors.rol} />
+              <ErrMsg msg={errors.como} />
             </div>
 
             {/* Deseo */}
@@ -213,6 +246,16 @@ export default function FormHistoria() {
         </div>
 
         <div className="modal-footer">
+          {errors._global && (
+            <span className="form-error" style={{ flex: 1, marginRight: 8 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {errors._global}
+            </span>
+          )}
           <button className="btn-modal-cancel" onClick={close}>Cancelar</button>
           <button className="btn-modal-save" onClick={handleSave} disabled={saving}>
             {saving ? 'Guardando…' : isEdit ? 'Actualizar historia' : 'Crear historia'}

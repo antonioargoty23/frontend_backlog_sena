@@ -2,9 +2,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getProyectos, createProyecto } from '../api/proyectos'
-import { getUsuarios } from '../api/usuarios'
+import { createUsuario } from '../api/usuarios'
 import FichaSelector from '../components/FichaSelector'
 import '../styles/proyectos.css'
+import PropTypes from 'prop-types'
 
 const MODAL_EMPTY = { nombre: '', descripcion: '', ficha_id: '', dueno: '', integrantes: '' }
 
@@ -464,4 +465,18 @@ export default function ProyectosPage() {
       )}
     </div>
   )
+}
+
+ModalNuevoInstructor.propTypes = {
+  onCreated: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+}
+
+ModalNuevoProyecto.propTypes = {
+  onCreated: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+}
+
+ErrMsg.propTypes = {
+  msg: PropTypes.string,
 }

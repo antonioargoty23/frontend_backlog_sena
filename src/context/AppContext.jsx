@@ -134,15 +134,16 @@ export function AppProvider({ children, proyectoId }) {
   // ── Historias ──────────────────────────────────────────────────────────────────
   async function addHistoria(epicaId, data) {
     const res = await createHistoria(epicaId, data)
-    const nueva = { ...res.data, epicaId }
+    const nueva = { ...(res.data?.data ?? res.data), epicaId }
     setHistorias(prev => [...prev, nueva])
     cacheHistoriaEpica(nueva.id, epicaId)
-    showToast(`✔ Historia ${res.data.codigo ?? res.data.id} creada`)
+    showToast(`✔ Historia ${nueva.codigo ?? nueva.id} creada`)
   }
 
   async function editHistoria(epicaId, historiaId, data) {
     const res = await updateHistoria(epicaId, historiaId, data)
-    setHistorias(prev => prev.map(h => h.id === historiaId ? { ...res.data, epicaId } : h))
+    const updated = res.data?.data ?? res.data
+    setHistorias(prev => prev.map(h => h.id === historiaId ? { ...updated, epicaId } : h))
     showToast('✔ Historia actualizada')
   }
 
