@@ -39,6 +39,9 @@ export const updateHistoria = (epicaId, historiaId, data) =>
 export const deleteHistoria = (epicaId, historiaId) =>
   api.delete(`/proyectos/${proyectoId()}/epicas/${epicaId}/historias/${historiaId}`)
 
+export const planHistoria = (epicaId, historiaId, data) =>
+  api.patch(`/proyectos/${proyectoId()}/epicas/${epicaId}/historias/${historiaId}/plan`, data)
+
 // ── Tareas ───────────────────────────────────────────────────────────────────
 // La ruta requiere epicaId. Se resuelve desde el caché historiaEpicaMap.
 

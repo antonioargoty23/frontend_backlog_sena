@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { getProyecto, updateProyecto, getBacklog } from '../api/proyectos'
 import {
   createEpica, updateEpica, deleteEpica,
-  createHistoria, updateHistoria, deleteHistoria,
+  createHistoria, updateHistoria, deleteHistoria, planHistoria as apiPlanHistoria,
   createTarea, updateTarea, deleteTarea,
   cacheManyHistoriasEpicas, cacheHistoriaEpica,
 } from '../api/backlog'
@@ -23,9 +23,10 @@ export function AppProvider({ children, proyectoId }) {
   const [huSeleccionada, setHuSeleccionada]     = useState(null)
 
   // Modales
-  const [modalEpica, setModalEpica] = useState({ open: false, editData: null })
-  const [modalHU, setModalHU]       = useState({ open: false, editData: null, epicaId: null })
-  const [modalTarea, setModalTarea] = useState({ open: false, editData: null, huActual: null })
+  const [modalEpica,  setModalEpica]  = useState({ open: false, editData: null })
+  const [modalHU,     setModalHU]     = useState({ open: false, editData: null, epicaId: null })
+  const [modalTarea,  setModalTarea]  = useState({ open: false, editData: null, huActual: null })
+  const [modalPoker,  setModalPoker]  = useState({ open: false, historia: null })
 
   // Confirm dialog
   const [confirmState, setConfirmState] = useState({ open: false, title: null, message: null, confirmLabel: null, danger: true })
@@ -76,7 +77,10 @@ export function AppProvider({ children, proyectoId }) {
       .then(res => {
         const payload = res.data?.data ?? res.data
         const ep = payload.epicas ?? []
-        const hu = payload.historias ?? []
+        // Las historias vienen anidadas dentro de cada épica; las aplanamos aquí
+        const hu = ep.flatMap(e =>
+          (e.historias ?? []).map(h => ({ ...h, epicaId: h.epicaId ?? e.id }))
+        )
         setEpicas(ep)
         setHistorias(hu)
         cacheManyHistoriasEpicas(hu)
@@ -154,6 +158,15 @@ export function AppProvider({ children, proyectoId }) {
     showToast('Historia eliminada')
   }
 
+  async function savePlanHistoria(historia, data) {
+    const res = await apiPlanHistoria(historia.epicaId, historia.id, data)
+    const updated = res.data?.data ?? res.data
+    setHistorias(prev => prev.map(h =>
+      h.id === historia.id ? { ...h, ...updated, epicaId: historia.epicaId } : h
+    ))
+    showToast('✔ Planificación guardada')
+  }
+
   // ── Tareas ────────────────────────────────────────────────────────────────────
   async function addTarea(hu, data) {
     const res = await createTarea(hu.id, data)
@@ -205,10 +218,11 @@ export function AppProvider({ children, proyectoId }) {
       modalEpica, setModalEpica,
       modalHU, setModalHU,
       modalTarea, setModalTarea,
+      modalPoker, setModalPoker,
       confirmState, askConfirm, resolveConfirm,
       toastMsg,
       addEpica, editEpica, removeEpica,
-      addHistoria, editHistoria, removeHistoria,
+      addHistoria, editHistoria, removeHistoria, savePlanHistoria,
       addTarea, editTarea, removeTarea,
       syncProyecto, updateInfoProyecto,
     }}>

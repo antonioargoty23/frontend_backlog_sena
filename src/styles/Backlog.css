@@ -778,6 +778,131 @@
 .row-menu-btn:hover { background: var(--bg-page); color: var(--text-primary); }
 
 /* ══════════════════════════════════════════════
+   PLANNING POKER — botón de fila
+   ══════════════════════════════════════════════ */
+.bl-btn-icon.poker { color: #7c3aed; }
+.bl-btn-icon.poker:hover { background: #ede9fe; color: #5b21b6; }
+
+/* ══════════════════════════════════════════════
+   PLANNING POKER — modal
+   ══════════════════════════════════════════════ */
+.poker-badge {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.poker-hu-summary {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.poker-hu-rol  { color: var(--text-muted); font-style: italic; }
+.poker-hu-deseo { color: var(--text-primary); font-weight: 500; }
+
+/* SP chips */
+.poker-sp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.poker-sp-chip {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-medium);
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.poker-sp-chip:hover {
+  border-color: #7c3aed;
+  color: #5b21b6;
+  background: #ede9fe;
+}
+.poker-sp-chip.selected {
+  border-color: #5b21b6;
+  background: #5b21b6;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.35);
+}
+
+/* Prioridad toggle-group */
+.poker-prio-group {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.poker-prio-btn {
+  flex: 1;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1.5px solid var(--border-medium);
+  background: var(--bg-page);
+  color: var(--text-secondary);
+}
+.poker-prio-btn.prio-alta.selected   { background: var(--priority-alta-bg);  color: var(--priority-alta-text);  border-color: var(--priority-alta-border); }
+.poker-prio-btn.prio-media.selected  { background: var(--priority-media-bg); color: var(--priority-media-text); border-color: var(--priority-media-border); }
+.poker-prio-btn.prio-baja.selected   { background: var(--priority-baja-bg);  color: var(--priority-baja-text);  border-color: var(--priority-baja-border); }
+.poker-prio-btn.prio-alta:hover  { border-color: var(--priority-alta-border); }
+.poker-prio-btn.prio-media:hover { border-color: var(--priority-media-border); }
+.poker-prio-btn.prio-baja:hover  { border-color: var(--priority-baja-border); }
+
+/* Estado toggle-group */
+.poker-estado-group {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.poker-estado-btn {
+  flex: 1;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1.5px solid var(--border-medium);
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.poker-estado-btn.estado-por-hacer.selected   { background: var(--estado-hacer-bg);    color: var(--estado-hacer-text);    border-color: var(--estado-hacer-border); }
+.poker-estado-btn.estado-en-progreso.selected { background: var(--estado-progreso-bg); color: var(--estado-progreso-text); border-color: var(--estado-progreso-border); }
+.poker-estado-btn.estado-hecho.selected       { background: var(--estado-hecho-bg);    color: var(--estado-hecho-text);    border-color: var(--estado-hecho-border); }
+.poker-estado-btn.estado-por-hacer:hover      { border-color: var(--estado-hacer-border); }
+.poker-estado-btn.estado-en-progreso:hover    { border-color: var(--estado-progreso-border); }
+.poker-estado-btn.estado-hecho:hover          { border-color: var(--estado-hecho-border); }
+
+.btn-poker-save {
+  background: #5b21b6 !important;
+}
+.btn-poker-save:hover { background: #4c1d95 !important; }
+
+/* ══════════════════════════════════════════════
    STAT CARDS (top del backlog)
    ══════════════════════════════════════════════ */
 .stats-grid {

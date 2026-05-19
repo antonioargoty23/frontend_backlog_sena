@@ -6,6 +6,7 @@ import Subheader from '../components/Subheader'
 import Sidebar from '../components/Sidebar'
 import FormEpica from '../components/FormEpica'
 import FormHistoria from '../components/FormHistoria'
+import FormPoker from '../components/FormPoker'
 import FormTarea from '../components/FormTarea'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Toast from '../components/Toast'
@@ -28,6 +29,12 @@ const IconTrash = () => (
 const IconChevron = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6"/>
+  </svg>
+)
+// Ícono de cartas para Planning Poker
+const IconPoker = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4 2h11a2 2 0 012 2v1h1a2 2 0 012 2v13a2 2 0 01-2 2H8a2 2 0 01-2-2v-1H4a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v13h2V7a2 2 0 012-2h7V4H4zm4 3v13h11V7H8z"/>
   </svg>
 )
 
@@ -180,7 +187,7 @@ function StatsPanel({ onClose }) {
 
 // ── Fila de Historia (dentro de la tabla) ──────────────────────
 function HistoriaRow({ historia, epica }) {
-  const { removeHistoria, setModalHU, askConfirm } = useApp()
+  const { removeHistoria, setModalHU, setModalPoker, askConfirm } = useApp()
 
   const handleEdit = (e) => {
     e.stopPropagation()
@@ -249,6 +256,13 @@ function HistoriaRow({ historia, epica }) {
 
       <td>
         <div className="row-actions">
+          <button
+            className="bl-btn-icon poker"
+            title="Planning Poker"
+            onClick={(e) => { e.stopPropagation(); setModalPoker({ open: true, historia }) }}
+          >
+            <IconPoker />
+          </button>
           <button className="bl-btn-icon" title="Editar historia" onClick={handleEdit}>
             <IconEdit />
           </button>
@@ -603,6 +617,7 @@ export default function BacklogPage() {
 
       <FormEpica />
       <FormHistoria />
+      <FormPoker />
       <FormTarea />
       <ConfirmDialog />
       <Toast />
