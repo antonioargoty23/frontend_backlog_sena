@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { getProyecto, updateProyecto, getBacklog } from '../api/proyectos'
 import {
   createEpica, updateEpica, deleteEpica,
-  createHistoria, updateHistoria, deleteHistoria, planHistoria as apiPlanHistoria,
+  createHistoria, updateHistoria, deleteHistoria,
   createTarea, updateTarea, deleteTarea,
   cacheManyHistoriasEpicas, cacheHistoriaEpica,
 } from '../api/backlog'
@@ -159,7 +159,8 @@ export function AppProvider({ children, proyectoId }) {
   }
 
   async function savePlanHistoria(historia, data) {
-    const res = await apiPlanHistoria(historia.epicaId, historia.id, data)
+    // Usa PUT /proyectos/:id/epicas/:epicaId/historias/:id con todos los campos
+    const res = await updateHistoria(historia.epicaId, historia.id, data)
     const updated = res.data?.data ?? res.data
     setHistorias(prev => prev.map(h =>
       h.id === historia.id ? { ...h, ...updated, epicaId: historia.epicaId } : h

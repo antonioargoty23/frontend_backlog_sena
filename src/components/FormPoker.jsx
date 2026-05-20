@@ -1,23 +1,39 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 
-// Valores Fibonacci estándar de planning poker
-const SP_VALUES = [1, 2, 3, 5, 8, 13, 21]
+// Vehículos Fibonacci — complejidad creciente
+const SP_VEHICLES = [
+  { value: 0,  emoji: '🛹', label: 'Skateboard',  tooltip: 'Skateboard — trivial, casi sin esfuerzo' },
+  { value: 1,  emoji: '🛵', label: 'Scooter',     tooltip: 'Scooter — muy pequeño, pocas horas' },
+  { value: 2,  emoji: '🚲', label: 'Bicicleta',   tooltip: 'Bicicleta — pequeño, medio día' },
+  { value: 3,  emoji: '🛴', label: 'Patineta',    tooltip: 'Patineta — pequeño-mediano, un día' },
+  { value: 5,  emoji: '🚗', label: 'Auto',        tooltip: 'Auto — mediano, varios días' },
+  { value: 8,  emoji: '🚌', label: 'Bus',         tooltip: 'Bus — medio-alto, casi un sprint' },
+  { value: 13, emoji: '🚛', label: 'Camión',      tooltip: 'Camión — grande, considerar dividir' },
+  { value: 21, emoji: '🚀', label: 'Cohete',      tooltip: 'Cohete — épico, dividir obligatoriamente' },
+]
 
-const PRIORIDADES = ['Alta', 'Media', 'Baja']
+const PRIORIDADES = ['alta', 'media', 'baja']
 
-const ESTADOS = ['Por hacer', 'En progreso', 'Hecho']
+const ESTADOS = ['por hacer', 'en progreso', 'completado']
 
 const EMPTY = {
-  story_points: null,
-  prioridad:    '',
-  sprint:       '',
-  estado:       'Por hacer',
-  responsable:  '',
+  sp:          null,
+  prioridad:   '',
+  sprint:      '',
+  estado:      'por hacer',
+  responsable: '',
+}
+
+/** 'Alta' → 'alta', 'En progreso' → 'en progreso', 'Hecho' → 'completado' */
+function normalizeEstado(e) {
+  if (!e) return 'por hacer'
+  const m = { 'hecho': 'completado', 'en progreso': 'en progreso', 'por hacer': 'por hacer' }
+  return m[e.toLowerCase()] ?? 'por hacer'
 }
 
 export default function FormPoker() {
-  const { modalPoker, setModalPoker, savePlanHistoria } = useApp()
+  const { modalPoker, setModalPoker, savePlanHistoria, proyecto } = useApp()
   const { open, historia } = modalPoker
 
   const [form, setForm]     = useState(EMPTY)
@@ -27,11 +43,11 @@ export default function FormPoker() {
   useEffect(() => {
     if (!open || !historia) return
     setForm({
-      story_points: historia.storyPoints ?? null,
-      prioridad:    historia.prioridad   ?? '',
-      sprint:       historia.sprint      ?? '',
-      estado:       historia.estado      ?? 'Por hacer',
-      responsable:  historia.responsable ?? '',
+      sp:          historia.storyPoints ?? null,
+      prioridad:   historia.prioridad?.toLowerCase() ?? '',
+      sprint:      historia.sprint      ?? '',
+      estado:      normalizeEstado(historia.estado),
+      responsable: historia.responsable ?? '',
     })
     setSaving(false)
     setError(null)
@@ -44,14 +60,32 @@ export default function FormPoker() {
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+
+    const proyectoId = proyecto?.id ?? localStorage.getItem('proyectoActivo')
+    const url = `/api/proyectos/${proyectoId}/epicas/${historia.epicaId}/historias/${historia.id}`
+
+    // Payload completo: contenido de la historia + campos de planificación
+    const payload = {
+      // Campos de contenido requeridos por el PUT
+      codigo:               historia.codigo,
+      epica_id:             historia.epicaId,
+      como:                 historia.rol   ?? '',
+      deseo:                historia.deseo ?? '',
+      para:                 historia.para  ?? '',
+      criterios_aceptacion: historia.criterios ?? undefined,
+      // Campos de planificación
+      sp:          form.sp,
+      prioridad:   form.prioridad    || undefined,
+      sprint:      form.sprint !== '' ? Number(form.sprint) : null,
+      estado:      form.estado       || undefined,
+      responsable: form.responsable.trim() || null,
+    }
+
+    console.log('[FormPoker] PUT', url)
+    console.log('[FormPoker] payload', payload)
+
     try {
-      await savePlanHistoria(historia, {
-        story_points: form.story_points,
-        prioridad:    form.prioridad    || undefined,
-        sprint:       form.sprint !== '' ? Number(form.sprint) : null,
-        estado:       form.estado       || undefined,
-        responsable:  form.responsable.trim() || null,
-      })
+      await savePlanHistoria(historia, payload)
       close()
     } catch (err) {
       setSaving(false)
@@ -68,13 +102,12 @@ export default function FormPoker() {
       className="modal-overlay open"
       onClick={(e) => { if (e.target === e.currentTarget) close() }}
     >
-      <div className="modal poker-modal" style={{ maxWidth: 540 }}>
+      <div className="modal poker-modal" style={{ maxWidth: 560 }}>
 
         {/* ── Cabecera ── */}
         <div className="modal-header">
           <div className="modal-title">
             <span className="modal-title-badge poker-badge">
-              {/* Ícono de cartas */}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M4 2h11a2 2 0 012 2v1h1a2 2 0 012 2v13a2 2 0 01-2 2H8a2 2 0 01-2-2v-1H4a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v13h2V7a2 2 0 012-2h7V4H4zm4 3v13h11V7H8z"/>
               </svg>
@@ -97,26 +130,31 @@ export default function FormPoker() {
             }
           </div>
 
-          {/* ── Story Points (chips Fibonacci) ── */}
+          {/* ── Story Points — tarjetas vehículo ── */}
           <div className="form-row">
             <label className="form-label">Story Points</label>
-            <div className="poker-sp-chips">
+            <div className="poker-sp-vehicles">
               {/* Chip para limpiar */}
               <button
                 type="button"
-                className={`poker-sp-chip${form.story_points === null ? ' selected' : ''}`}
-                onClick={() => setForm(f => ({ ...f, story_points: null }))}
+                title="Sin estimación"
+                className={`poker-sp-card${form.sp === null ? ' selected' : ''}`}
+                onClick={() => setForm(f => ({ ...f, sp: null }))}
               >
-                —
+                <span className="poker-sp-emoji">—</span>
+                <span className="poker-sp-num">?</span>
               </button>
-              {SP_VALUES.map(v => (
+
+              {SP_VEHICLES.map(({ value, emoji, tooltip }) => (
                 <button
-                  key={v}
+                  key={value}
                   type="button"
-                  className={`poker-sp-chip${form.story_points === v ? ' selected' : ''}`}
-                  onClick={() => setForm(f => ({ ...f, story_points: v }))}
+                  title={tooltip}
+                  className={`poker-sp-card${form.sp === value ? ' selected' : ''}`}
+                  onClick={() => setForm(f => ({ ...f, sp: value }))}
                 >
-                  {v}
+                  <span className="poker-sp-emoji">{emoji}</span>
+                  <span className="poker-sp-num">{value}</span>
                 </button>
               ))}
             </div>
@@ -133,10 +171,10 @@ export default function FormPoker() {
                   <button
                     key={p}
                     type="button"
-                    className={`poker-prio-btn prio-${p.toLowerCase()}${form.prioridad === p ? ' selected' : ''}`}
+                    className={`poker-prio-btn prio-${p}${form.prioridad === p ? ' selected' : ''}`}
                     onClick={() => setForm(f => ({ ...f, prioridad: p }))}
                   >
-                    {p}
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
                   </button>
                 ))}
               </div>
@@ -170,10 +208,10 @@ export default function FormPoker() {
                 <button
                   key={e}
                   type="button"
-                  className={`poker-estado-btn estado-${e.toLowerCase().replace(/ /g, '-')}${form.estado === e ? ' selected' : ''}`}
+                  className={`poker-estado-btn estado-${e.replace(/ /g, '-')}${form.estado === e ? ' selected' : ''}`}
                   onClick={() => setForm(f => ({ ...f, estado: e }))}
                 >
-                  {e}
+                  {e.charAt(0).toUpperCase() + e.slice(1)}
                 </button>
               ))}
             </div>

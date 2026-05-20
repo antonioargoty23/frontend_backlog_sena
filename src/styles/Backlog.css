@@ -811,39 +811,54 @@
 .poker-hu-rol  { color: var(--text-muted); font-style: italic; }
 .poker-hu-deseo { color: var(--text-primary); font-weight: 500; }
 
-/* SP chips */
-.poker-sp-chips {
+/* SP — tarjetas vehículo */
+.poker-sp-vehicles {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
 }
-.poker-sp-chip {
-  min-width: 44px;
-  height: 44px;
-  border-radius: 8px;
+.poker-sp-card {
+  width: 58px;
+  height: 66px;
+  border-radius: 10px;
   border: 1.5px solid var(--border-medium);
   background: var(--bg-page);
   color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  padding: 0;
+  position: relative;
 }
-.poker-sp-chip:hover {
+.poker-sp-card:hover {
   border-color: #7c3aed;
-  color: #5b21b6;
   background: #ede9fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124,58,237,0.18);
 }
-.poker-sp-chip.selected {
+.poker-sp-card.selected {
   border-color: #5b21b6;
   background: #5b21b6;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(91,33,182,0.35);
+  box-shadow: 0 3px 10px rgba(91,33,182,0.4);
+  transform: translateY(-2px);
+}
+.poker-sp-emoji {
+  font-size: 22px;
+  line-height: 1;
+  display: block;
+}
+.poker-sp-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  display: block;
 }
 
 /* Prioridad toggle-group */
@@ -892,10 +907,10 @@
 }
 .poker-estado-btn.estado-por-hacer.selected   { background: var(--estado-hacer-bg);    color: var(--estado-hacer-text);    border-color: var(--estado-hacer-border); }
 .poker-estado-btn.estado-en-progreso.selected { background: var(--estado-progreso-bg); color: var(--estado-progreso-text); border-color: var(--estado-progreso-border); }
-.poker-estado-btn.estado-hecho.selected       { background: var(--estado-hecho-bg);    color: var(--estado-hecho-text);    border-color: var(--estado-hecho-border); }
+.poker-estado-btn.estado-completado.selected  { background: var(--estado-hecho-bg);    color: var(--estado-hecho-text);    border-color: var(--estado-hecho-border); }
 .poker-estado-btn.estado-por-hacer:hover      { border-color: var(--estado-hacer-border); }
 .poker-estado-btn.estado-en-progreso:hover    { border-color: var(--estado-progreso-border); }
-.poker-estado-btn.estado-hecho:hover          { border-color: var(--estado-hecho-border); }
+.poker-estado-btn.estado-completado:hover     { border-color: var(--estado-hecho-border); }
 
 .btn-poker-save {
   background: #5b21b6 !important;
