@@ -21,6 +21,18 @@ export const getBacklog = (id) =>
 export const getResumen = (id) =>
   api.get(`/proyectos/${id}/resumen`)
 
+export const descargarPlantilla = async () => {
+  const response = await api.get('/excel/plantilla', { responseType: 'blob' })
+  const url  = window.URL.createObjectURL(new Blob([response.data]))
+  const link = document.createElement('a')
+  link.href  = url
+  link.download = 'backlog-plantilla.xlsx'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
 export const descargarExcel = async (id) => {
   const response = await api.get(`/proyectos/${id}/excel`, {
     responseType: 'blob',
