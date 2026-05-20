@@ -46,7 +46,7 @@ export default function FormTarea() {
         codigo:       editData.codigo ?? editData.id ?? '',
         nombre:       editData.nombre ?? '',
         tipo:         editData.tipo ?? 'frontend',
-        estado_pct:   parseInt(editData.estado) || 0,
+        estado_pct:   editData.estadoPct ?? editData.estado_pct ?? 0,
         responsable_id: editData.responsable ?? '',
         estimacion:   String(editData.estimacion ?? ''),
         prioridad:    editData.prioridad ?? 'ALTA',
@@ -86,15 +86,10 @@ export default function FormTarea() {
     setSaving(true)
     try {
       const payload = {
-        codigo:       form.codigo.trim(),
-        nombre:       form.nombre.trim(),
-        tipo:         form.tipo,
-        estado:       String(form.estado_pct),
-        responsable:  form.responsable_id.trim(),
-        estimacion:   form.estimacion,
-        prioridad:    form.prioridad,
-        dependencias: form.dependencias.trim(),
-        condicion:    form.condicion.trim(),
+        titulo:         form.nombre.trim(),
+        tipo:           form.tipo,
+        estado_pct:     Number(form.estado_pct),
+        responsable_id: form.responsable_id.trim() || undefined,
       }
       if (isEdit) {
         await editTarea(hu, editData.id, payload)

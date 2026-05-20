@@ -27,6 +27,7 @@ export function AppProvider({ children, proyectoId }) {
   const [modalHU,     setModalHU]     = useState({ open: false, editData: null, epicaId: null })
   const [modalTarea,  setModalTarea]  = useState({ open: false, editData: null, huActual: null })
   const [modalPoker,  setModalPoker]  = useState({ open: false, historia: null })
+  const [modalTareas, setModalTareas] = useState({ open: false, historia: null })
 
   // Confirm dialog
   const [confirmState, setConfirmState] = useState({ open: false, title: null, message: null, confirmLabel: null, danger: true })
@@ -89,20 +90,27 @@ export function AppProvider({ children, proyectoId }) {
       .finally(() => setLoading(false))
   }, [proyectoId])
 
-  // ── Tareas: carga al seleccionar HU ──────────────────────────────────────────
+  // ── Función reutilizable para cargar tareas de una HU ────────────────────────
+  const loadTareasHu = useCallback(async (hu) => {
+    if (!hu || !proyecto.id) return
+    try {
+      const res = await api.get(
+        `/proyectos/${proyecto.id}/epicas/${hu.epicaId}/historias/${hu.id}/tareas`
+      )
+      const lista = res.data?.data ?? res.data ?? []
+      setTareas(prev => [
+        ...prev.filter(t => t.huId !== hu.id),
+        ...lista.map(t => ({ ...t, huId: hu.id })),
+      ])
+    } catch (e) { console.error(e) }
+  }, [proyecto.id])
+
+  // ── Tareas: carga al seleccionar HU (vista Tareas) ───────────────────────────
   useEffect(() => {
     if (!huSeleccionada || !proyecto.id) return
     const hu = historias.find(h => h.id === huSeleccionada)
     if (!hu) return
-    api.get(`/proyectos/${proyecto.id}/epicas/${hu.epicaId}/historias/${hu.id}/tareas`)
-      .then(res => {
-        const lista = res.data?.data ?? res.data ?? []
-        setTareas(prev => [
-          ...prev.filter(t => t.huId !== huSeleccionada),
-          ...lista.map(t => ({ ...t, huId: hu.id })),
-        ])
-      })
-      .catch(console.error)
+    loadTareasHu(hu)
   }, [huSeleccionada, proyecto.id])
 
   // ── Stats derivados ───────────────────────────────────────────────────────────
@@ -220,6 +228,7 @@ export function AppProvider({ children, proyectoId }) {
       modalHU, setModalHU,
       modalTarea, setModalTarea,
       modalPoker, setModalPoker,
+      modalTareas, setModalTareas, loadTareasHu,
       confirmState, askConfirm, resolveConfirm,
       toastMsg,
       addEpica, editEpica, removeEpica,

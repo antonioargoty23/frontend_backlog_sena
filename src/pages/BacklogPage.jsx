@@ -8,6 +8,7 @@ import FormEpica from '../components/FormEpica'
 import FormHistoria from '../components/FormHistoria'
 import FormPoker from '../components/FormPoker'
 import FormTarea from '../components/FormTarea'
+import ModalTareas from '../components/ModalTareas'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Toast from '../components/Toast'
 import '../styles/backlog.css'
@@ -35,6 +36,18 @@ const IconChevron = () => (
 const IconPoker = () => (
   <svg viewBox="0 0 24 24" fill="currentColor">
     <path d="M4 2h11a2 2 0 012 2v1h1a2 2 0 012 2v13a2 2 0 01-2 2H8a2 2 0 01-2-2v-1H4a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v13h2V7a2 2 0 012-2h7V4H4zm4 3v13h11V7H8z"/>
+  </svg>
+)
+// Ícono de checklist para tareas
+const IconTasks = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+    strokeLinecap="round" strokeLinejoin="round">
+    <line x1="8" y1="6"  x2="21" y2="6"/>
+    <line x1="8" y1="12" x2="21" y2="12"/>
+    <line x1="8" y1="18" x2="21" y2="18"/>
+    <polyline points="3 6 4 7 6 5"/>
+    <polyline points="3 12 4 13 6 11"/>
+    <polyline points="3 18 4 19 6 17"/>
   </svg>
 )
 
@@ -187,7 +200,13 @@ function StatsPanel({ onClose }) {
 
 // ── Fila de Historia (dentro de la tabla) ──────────────────────
 function HistoriaRow({ historia, epica }) {
-  const { removeHistoria, setModalHU, setModalPoker, askConfirm } = useApp()
+  const { removeHistoria, setModalHU, setModalPoker, setModalTareas, tareas, askConfirm } = useApp()
+
+  // Progreso basado en las tareas ya cargadas para esta HU
+  const huTareas = tareas.filter(t => t.huId === historia.id)
+  const avgPct = huTareas.length
+    ? Math.round(huTareas.reduce((s, t) => s + (t.estadoPct ?? t.estado_pct ?? 0), 0) / huTareas.length)
+    : null   // null = no cargadas aún
 
   const handleEdit = (e) => {
     e.stopPropagation()
@@ -254,8 +273,35 @@ function HistoriaRow({ historia, epica }) {
         {historia.responsable || <span className="td-muted">—</span>}
       </td>
 
+      {/* Avance: progreso promedio de tareas */}
+      <td className="td-avance">
+        {avgPct !== null ? (
+          <div className="hu-avance-wrap">
+            <div className="hu-avance-bar">
+              <div
+                className="hu-avance-fill"
+                style={{
+                  width: `${avgPct}%`,
+                  background: avgPct === 100 ? '#10b981' : avgPct >= 60 ? '#3b82f6' : avgPct >= 30 ? '#f59e0b' : '#d1d5db',
+                }}
+              />
+            </div>
+            <span className="hu-avance-pct">{avgPct}%</span>
+          </div>
+        ) : (
+          <span className="td-muted">—</span>
+        )}
+      </td>
+
       <td>
         <div className="row-actions">
+          <button
+            className="bl-btn-icon tasks"
+            title="Ver tareas"
+            onClick={(e) => { e.stopPropagation(); setModalTareas({ open: true, historia }) }}
+          >
+            <IconTasks />
+          </button>
           <button
             className="bl-btn-icon poker"
             title="Planning Poker"
@@ -357,7 +403,8 @@ function EpicaSection({ epica }) {
                   <th style={{ width: 68, textAlign: 'center' }}>Sprint</th>
                   <th style={{ width: 110 }}>Estado</th>
                   <th style={{ width: 108 }}>Responsable</th>
-                  <th style={{ width: 72, textAlign: 'center' }}>Acciones</th>
+                  <th style={{ width: 100 }}>Avance</th>
+                  <th style={{ width: 100, textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -618,6 +665,7 @@ export default function BacklogPage() {
       <FormEpica />
       <FormHistoria />
       <FormPoker />
+      <ModalTareas />
       <FormTarea />
       <ConfirmDialog />
       <Toast />
